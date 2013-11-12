@@ -14,11 +14,6 @@
 #include "encoding.hpp"
 #include "stream.hpp"
 
-// Here defines natural and real types in global namespace.
-// If user have their own definition, can define following types as differently.
-typedef __int64		natural;
-typedef double		real;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Type
 namespace jsoncxx
@@ -33,6 +28,10 @@ namespace jsoncxx
 		StringType,	//!< string
 		NumberType,	//!< number
 	};
+
+	//! Type define of internal number types
+	typedef __int64		natural;
+	typedef double		real;
 
 	//! Type of number
 	enum NumericType : unsigned int {

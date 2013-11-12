@@ -123,10 +123,6 @@ public:
 
 	//! ctor
 	generic_reader() {}
-	
-	//bool hasParseError() const { return parseError_ != nullptr; }
-	//const char* getParseError() const { return parseError_; }
-	//size_type getErrorOffset() const { return errorOffset_; }
 
 	bool parse(const char* filename, generic_value<Encoding>& root)
 	{
@@ -174,16 +170,7 @@ public:
 		return true;
 	}
 
-//private:
-	////! Parse JSON text.
-	//template <unsigned int Flag, typename Stream, typename Handler>
-	//bool parse(Stream& stream, Handler& handler)
-	//{
-	//	parseError_ = nullptr;
-	//	errorOffset_ = 0;
-	//	return true;
-	//}
-
+private:
 	generic_value<Encoding> parseObject(Stream& stream, ParseFlag flag)
 	{
 		generic_value<Encoding> ret(ObjectType);
@@ -209,8 +196,6 @@ public:
 
 			SkipWhitespace(stream);
 
-			//generic_value<Encoding> value = parseValue(stream, flag);
-
 			ret.insert(std::move(key), parseValue(stream, flag));
 
 			SkipWhitespace(stream);
@@ -218,8 +203,7 @@ public:
 			switch (stream.take()) {
 			case ',': SkipWhitespace(stream); break;
 			case '}': return ret;
-			default:
-				throw std::runtime_error("Must be a comma or '}' after an object member"); // stream.tell();
+			default: throw std::runtime_error("Must be a comma or '}' after an object member"); // stream.tell();
 			}
 		}
 
@@ -245,13 +229,9 @@ public:
 			SkipWhitespace(stream);
 
 			switch (stream.take()) {
-			case ',':
-				SkipWhitespace(stream);
-				break;
-			case ']':
-				return ret;
-			default:
-				throw std::runtime_error("Must be a comma or ']' after an array member"); // stream.tell();
+			case ',': SkipWhitespace(stream); break;
+			case ']': return ret;
+			default: throw std::runtime_error("Must be a comma or ']' after an array member"); // stream.tell();
 			}
 		}
 
@@ -300,8 +280,6 @@ public:
 
 	generic_value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
 	{
-		typedef std::basic_regex<char_type> generic_regex;
-
 		Stream s = stream; // Local copy for optimization
 		
 		// parse number
@@ -309,10 +287,6 @@ public:
 				s.peek() == '.' ||
 				s.peek() == 'e' || s.peek() == 'E' ||
 				s.peek() == '-' || s.peek() == '+') s.take();
-		
-		/*std::regex re("^(?:-?[0-9]+\\.?[0-9]+([eE][-+]?[0-9]+)?)");
-		std::smatch match;
-		bool matched = std::regex_match(stream.src_, s.src_, match, re);*/
 
 		generic_value<Encoding> ret(NumberType);
 
@@ -321,7 +295,7 @@ public:
 		if (number.find_first_of('.') == std::string::npos)
 			ret = std::move(generic_value<Encoding>((natural)std::stoll(number)));
 		else
-			ret = std::move(generic_value<Encoding>(std::stod(number)));
+			ret = std::move(generic_value<Encoding>((real)std::stod(number)));
 
 		stream = s;
 
@@ -343,21 +317,16 @@ public:
 		else
 			length = 0;
 
-		//bool status = true;
-		while (true/*status*/) {
+		while (true) {
 			switch (s.peek()) {
 			case '\"':
-				// add string
 				ret = generic_value<Encoding>(stream.src_ + 1, s.src_); // without '\"'
 				s.take();
 				stream = s;
 				return ret;
-			case '\0':
-				throw std::runtime_error("Lacks ending quation before the the end of string");
-			case '\\':
-				throw std::runtime_error("Currently not supported!");
-			default:
-				s.take(); // normal character
+			case '\0': throw std::runtime_error("Lacks ending quation before the the end of string");
+			case '\\': throw std::runtime_error("Currently not supported!");
+			default: s.take(); // normal character
 			}
 		}
 
@@ -374,7 +343,6 @@ public:
 		case '"': return parseString(stream, flag);
 		case '{': return parseObject(stream, flag);
 		case '[': return parseArray (stream, flag);
-		//default:  return parseNumber(stream, flag);
 		}
 
 		return parseNumber(stream, flag);

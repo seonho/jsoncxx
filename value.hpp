@@ -270,13 +270,13 @@ public:
 		if (std::is_floating_point<T>::value) {
 			value_.n.type_ = RealNumber;
 			if (std::is_same<T, real>::value)
-				value_.n.num_.r = (real)value;
+				value_.n.num_.r = (real)value; // to suppress compiler warning (this is no op)
 			else
 				value_.n.num_.r = static_cast<real>(value);
 		} else {
 			value_.n.type_ = NaturalNumber;
 			if (std::is_same<T, natural>::value)
-				value_.n.num_.n = (natural)value; // suppress compiler warning (this is no op)
+				value_.n.num_.n = (natural)value; // to suppress compiler warning (this is no op)
 			else
 				value_.n.num_.n = static_cast<natural>(value);
 		}
