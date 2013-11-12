@@ -132,10 +132,13 @@ public:
 	bool parse(const char* filename, generic_value<Encoding>& root)
 	{
 		std::ifstream fin(filename);
-		std::string json;
-		std::getline(fin, json, (char)EOF);
-		generic_stringstream<Encoding> s(json.c_str());
-		return parse(s, root);
+		if (fin.is_open()) {
+			std::string json;
+			std::getline(fin, json, (char)EOF);
+			generic_stringstream<Encoding> s(json.c_str());
+			return parse(s, root);
+		}
+		return false;
 	}
 
 	bool parse(Stream& stream, generic_value<Encoding>& root, ParseFlag flag = ParseDefault)
