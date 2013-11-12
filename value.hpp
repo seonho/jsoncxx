@@ -1,3 +1,11 @@
+/**
+ *	@file		value.hpp
+ *	@author		seonho.oh@gmail.com
+ *	@date		2013-11-01
+ *	@copyright	2007-2013 seonho.oh@gmail.com
+ *	@version	1.0
+ */
+
 #pragma once
 
 #include "jsoncxx.hpp"
@@ -167,6 +175,28 @@ public:
 			return (*itr).second;
 		}
 
+		value_type& operator [] (key_type& key)
+		{
+			JSONCXX_ASSERT(key.type() == StringType);
+
+			// make hash key
+			key.value_.s.hash_ = std::hash<generic_string>()(*key.value_.s.str_);
+
+			auto itr = members_->find(key);
+			if (itr != members_->end())
+				return (*itr).second;
+
+			// R-value reference
+			auto bi = members_->emplace(
+				std::move(std::make_pair(std::move(key), 
+									     std::move(value_type()) )
+										 )
+									);
+			assert(bi.second); // is it possible?
+
+			return ((*(bi.first)).second);
+		}
+
 		typedef typename storage_type::iterator			iterator;
 		inline iterator begin()	{ return members_->begin(); }
 		inline iterator end()	{ return members_->end(); }
@@ -240,7 +270,7 @@ public:
 		if (std::is_floating_point<T>::value) {
 			value_.n.type_ = RealNumber;
 			if (std::is_same<T, real>::value)
-				value_.n.num_.r = value;
+				value_.n.num_.r = (real)value;
 			else
 				value_.n.num_.r = static_cast<real>(value);
 		} else {
@@ -273,6 +303,13 @@ public:
 		//std::swap(*(value_.s.str_), value);
 		value_.s.str_ = new generic_string(value);
 		//value_.s.hash_ = std::hash<generic_string>()(value);
+	}
+	
+	//! ctor
+	generic_value(const char_type* begin, const char_type* end)
+		: type_(StringType)
+	{
+		value_.s.str_ = new std::string(begin, end);
 	}
 
 	//! Default dtor.
@@ -409,7 +446,7 @@ public:
 	//! 
 	inline self_type& operator [] (const size_type index)
 	{
-		JSONCXX_ASSERT(type_ == ArrayType);		
+		JSONCXX_ASSERT(type_ == ArrayType);
 		return value_.a[index];
 	}
 
@@ -459,6 +496,22 @@ public:
 
 		return (value_.o)[key];
 	}
+
+	/*explicit inline self_type& operator [] (const self_type& key)
+	{
+		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
+
+		if (type_ == NullType)
+			*this = std::move(self_type(ObjectType));
+
+		return (value_.o)[key];
+	}*/
+
+	inline void insert(self_type&& key, self_type&& value)
+	{
+		(value_.o)[key] = value;
+	}
+
 
 	//inline self_type& operator= (self_type& rhs)
 	//{

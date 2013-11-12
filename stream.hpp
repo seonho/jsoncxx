@@ -1,3 +1,11 @@
+/**
+ *	@file		value.hpp
+ *	@author		seonho.oh@gmail.com
+ *	@date		2013-11-01
+ *	@copyright	2007-2013 seonho.oh@gmail.com, 2011-2012 Milo Yip (miloyip@gmail.com)
+ *	@version	1.0
+ */
+
 #pragma once
 
 #include "encoding.hpp"
@@ -6,31 +14,35 @@ namespace jsoncxx {
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Stream
-
+//	Modified by Seonho Oh(seonho.oh@gmail.com)
+//	Original code by 
+//		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
+//		Version 0.11
+//
 /*! \class jsoncxx::stream
 	\brief Concept for reading and writing characters.
 
-	For read-only stream, no need to implement PutBegin(), Put() and PutEnd().
+	For read-only stream, no need to implement begin(), put() and end().
 
-	For write-only stream, only need to implement Put().
+	For write-only stream, only need to implement put().
 
 \code
 concept Stream {
 	typename char_type;	//!< Character type of the stream.
 
 	//! Read the current character from stream without moving the read cursor.
-	char_type Peek() const;
+	char_type peek() const;
 
 	//! Read the current character from stream and moving the read cursor to next character.
-	char_type Take();
+	char_type take();
 
 	//! Get the current read cursor.
 	//! \return Number of characters read from start.
-	size_t Tell();
+	size_t tell();
 
 	//! Begin writing operation at the current read pointer.
 	//! \return The begin writer pointer.
-	char_type* PutBegin();
+	char_type* begin();
 
 	//! Write a character.
 	void Put(char_type c);
@@ -38,7 +50,7 @@ concept Stream {
 	//! End the writing operation.
 	//! \param begin The begin write pointer returned by PutBegin().
 	//! \return Number of characters written.
-	size_t PutEnd(char_type* begin);
+	size_t end(char_type* begin);
 }
 \endcode
 */
@@ -62,19 +74,19 @@ struct generic_stringstream {
 
 	generic_stringstream(const char_type *src) : src_(src), head_(src) {}
 
-	char_type peek() const { return *src_; }
-	char_type take() { return *src_++; }
-	size_t tell() const { return src_ - head_; }
+	inline char_type peek() const { return *src_; }
+	inline char_type take() { return *src_++; }
+	inline size_t tell() const { return src_ - head_; }
 
-	char_type* begin() { JSONCXX_ASSERT(false); return 0; }
-	void put(char_type) { JSONCXX_ASSERT(false); }
-	size_t end(char_type*) { JSONCXX_ASSERT(false); return 0; }
+	inline char_type* begin() { JSONCXX_ASSERT(false); return 0; }
+	inline void put(char_type) { JSONCXX_ASSERT(false); }
+	inline size_t end(char_type*) { JSONCXX_ASSERT(false); return 0; }
 
-	const char_type* src_;		//!< Current read position.
+	const char_type* src_;	//!< Current read position.
 	const char_type* head_;	//!< Original head of the string.
 };
 
-typedef generic_stringstream<UTF8<> > stringstream;
+typedef generic_stringstream<UTF8<> > StringStream;
 
 ///////////////////////////////////////////////////////////////////////////////
 // InsituStringStream
@@ -104,6 +116,6 @@ struct generic_inplace_stringstream {
 	char_type* head_;
 };
 
-typedef generic_inplace_stringstream<UTF8<> > inplace_stringstream;
+typedef generic_inplace_stringstream<UTF8<> > InplaceStringStream;
 
 }

@@ -1,22 +1,34 @@
+/**
+ *	@file		value.hpp
+ *	@author		seonho.oh@gmail.com
+ *	@date		2013-11-01
+ *	@copyright	2007-2013 seonho.oh@gmail.com, 2011-2012 Milo Yip (miloyip@gmail.com)
+ *	@version	1.0
+ */
+
 #pragma once
 
 namespace jsoncxx {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Encoding
-
+//	Modified by Seonho Oh(seonho.oh@gmail.com)
+//	Original code by 
+//		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
+//		Version 0.11
+//
 /*! \class jsoncxx::Encoding
 	\brief Concept for encoding of Unicode characters.
 
 \code
 concept Encoding {
-	typename Ch;	//! Type of character.
+	typename char_type;	//! Type of character.
 
 	//! \brief Encode a Unicode codepoint to a buffer.
 	//! \param buffer pointer to destination buffer to store the result. It should have sufficient size of encoding one character.
 	//! \param codepoint An unicode codepoint, ranging from 0x0 to 0x10FFFF inclusively.
 	//! \returns the pointer to the next character after the encoded data.
-	static Ch* Encode(Ch *buffer, unsigned codepoint);
+	static char_type* Encode(char_type *buffer, unsigned codepoint);
 };
 \endcode
 */

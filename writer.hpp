@@ -1,3 +1,11 @@
+/**
+ *	@file		value.hpp
+ *	@author		seonho.oh@gmail.com
+ *	@date		2013-11-01
+ *	@copyright	2007-2013 seonho.oh@gmail.com
+ *	@version	1.0
+ */
+
 #pragma once
 
 #include "jsoncxx.hpp"
@@ -19,16 +27,6 @@ public:
 
 	writer(Stream& stream, size_type nestingLevel = 0)
 		: stream_(stream), nestingLevel_(nestingLevel) {}
-
-	//@name Implementation of Handlers
-	//@{
-	/*writer& null()					{ return *this; }
-	writer& boolean(bool b)			{ return *this; }
-	writer& number(const Number& n)	{ return *this; }
-	writer& string(const String& s)	{ return *this; }
-	writer& array(const Array& a)	{ return *this; }
-	writer& object(const Object& o)	{ return *this; }*/
-	//@}
 
 	writer& operator << (const generic_value<Encoding>& value)
 	{
