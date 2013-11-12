@@ -115,6 +115,40 @@ template<> inline void SkipWhitespace(stringstream& stream) {
 }
 #endif // JSONCXX_SIMD
 
+class parsing_error
+	: public std::runtime_error
+{
+public:
+	typedef std::runtime_error _Mybase;
+
+	explicit parsing_error(const std::string& _Message, const std::string& _File, size_t _Line, const std::string& _Func)
+		: _Mybase(_Message)
+	{
+		std::ostringstream oss;
+		oss << "Parsing error at " << _Func << std::endl;
+		oss << _File << "(" << _Line << "): " << _Message;
+		msg_ = oss.str();
+	}
+
+	explicit parsing_error(const char *_Message, const char *_File, size_t _Line, char *_Func)
+		: _Mybase(_Message)
+	{
+		std::ostringstream oss;
+		oss << "Parsing error at " << _Func << std::endl;
+		oss << _File << "(" << _Line << "): " << _Message;
+		msg_ = oss.str();
+	}
+
+	~parsing_error() throw() {}
+
+	const char* what() const throw() { return msg_.c_str(); }
+
+private:
+	std::string msg_;
+};
+
+#define JSONCXX_PARSING_ERROR(msg) throw parsing_error(msg, __FILE__, __LINE__, __FUNCTION__)
+
 template <typename Stream, typename Encoding = UTF8<> >
 class generic_reader
 {
@@ -144,7 +178,7 @@ public:
 
 		try {
 			if (stream.peek() == '\0')
-				throw std::runtime_error("Text only contains white space(s).");
+				JSONCXX_PARSING_ERROR("Text only contains white space(s).");
 			else {
 				switch (stream.peek()) {
 				case '{':
@@ -154,15 +188,15 @@ public:
 					root = parseArray (stream, flag); 
 					break;
 				default:
-					throw std::runtime_error("Except either an object or array at root.");
+					JSONCXX_PARSING_ERROR("Except either an object or array at root.");
 				}
 
 				SkipWhitespace(stream);
 
 				if (stream.peek() != '\0')
-					throw std::runtime_error("Nothig should follow the root object or array.");
+					JSONCXX_PARSING_ERROR("Nothig should follow the root object or array.");
 			}
-		} catch (std::exception& e) {
+		} catch (std::runtime_error& e) {
 			std::cerr << e.what() << std::endl;
 			return false;
 		}
@@ -186,13 +220,13 @@ private:
 
 		while(true) {
 			if (stream.peek() != '"')
-				throw std::runtime_error("Name of an object member must be a string"); // stream.tell();
+				JSONCXX_PARSING_ERROR("Name of an object member must be a string"); // stream.tell();
 
 			generic_value<Encoding> key = parseString(stream, flag);
 			SkipWhitespace(stream);
 
 			if (stream.take() != ':')
-				throw std::runtime_error("There must be a colon after the name of object member"); // stream.tell();
+				JSONCXX_PARSING_ERROR("There must be a colon after the name of object member"); // stream.tell();
 
 			SkipWhitespace(stream);
 
@@ -203,7 +237,7 @@ private:
 			switch (stream.take()) {
 			case ',': SkipWhitespace(stream); break;
 			case '}': return ret;
-			default: throw std::runtime_error("Must be a comma or '}' after an object member"); // stream.tell();
+			default: JSONCXX_PARSING_ERROR("Must be a comma or '}' after an object member"); // stream.tell();
 			}
 		}
 
@@ -231,7 +265,7 @@ private:
 			switch (stream.take()) {
 			case ',': SkipWhitespace(stream); break;
 			case ']': return ret;
-			default: throw std::runtime_error("Must be a comma or ']' after an array member"); // stream.tell();
+			default: JSONCXX_PARSING_ERROR("Must be a comma or ']' after an array member"); // stream.tell();
 			}
 		}
 
@@ -248,7 +282,7 @@ private:
 			stream.take() == 'l')
 			return generic_value<Encoding>(); // null
 		else
-			throw std::runtime_error("Invalid value"); // stream.tell() - 1;
+			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	generic_value<Encoding> parseTrue(Stream& stream, ParseFlag flag)
@@ -261,7 +295,7 @@ private:
 			stream.take() == 'e')
 			return generic_value<Encoding>(TrueType); // true
 		else
-			throw std::runtime_error("Invalid value"); // stream.tell() - 1;
+			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	generic_value<Encoding> parseFalse(Stream& stream, ParseFlag flag)
@@ -275,7 +309,7 @@ private:
 			stream.take() == 'e')
 			return generic_value<Encoding>(FalseType); // false
 		else
-			throw std::runtime_error("Invalid value"); // stream.tell() - 1;
+			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	generic_value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
@@ -288,7 +322,7 @@ private:
 				s.peek() == 'e' || s.peek() == 'E' ||
 				s.peek() == '-' || s.peek() == '+') s.take();
 
-		generic_value<Encoding> ret(NumberType);
+		generic_value<Encoding> ret;
 
 		std::string number(stream.src_, s.src_);
 
@@ -324,8 +358,8 @@ private:
 				s.take();
 				stream = s;
 				return ret;
-			case '\0': throw std::runtime_error("Lacks ending quation before the the end of string");
-			case '\\': throw std::runtime_error("Currently not supported!");
+			case '\0': JSONCXX_PARSING_ERROR("Lacks ending quation before the the end of string");
+			case '\\': JSONCXX_PARSING_ERROR("Currently not supported!");
 			default: s.take(); // normal character
 			}
 		}
