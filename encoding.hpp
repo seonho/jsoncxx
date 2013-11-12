@@ -45,7 +45,7 @@ template<typename CharType = char>
 struct UTF8 {
 	typedef CharType char_type;
 
-	static char_type* Encode(char_type *buffer, unsigned codepoint) {
+	static char_type* Encode(char_type *buffer, char32_t codepoint) {
 		if (codepoint <= 0x7F) 
 			*buffer++ = codepoint & 0xFF;
 		else if (codepoint <= 0x7FF) {
@@ -80,7 +80,7 @@ template<typename CharType = char16_t>
 struct UTF16 {
 	typedef CharType char_type;
 
-	static char_type* Encode(char_type* buffer, unsigned codepoint) {
+	static char_type* Encode(char_type* buffer, char32_t codepoint) {
 		if (codepoint <= 0xFFFF) {
 			JSONCXX_ASSERT(codepoint < 0xD800 || codepoint > 0xDFFF); // Code point itself cannot be surrogate pair 
 			*buffer++ = static_cast<char_type>(codepoint);
@@ -107,7 +107,7 @@ template<typename CharType = char32_t>
 struct UTF32 {
 	typedef CharType char_type;
 
-	static char_type *Encode(char_type* buffer, unsigned codepoint) {
+	static char_type *Encode(char_type* buffer, char32_t codepoint) {
 		JSONCXX_ASSERT(codepoint <= 0x10FFFF);
 		*buffer++ = codepoint;
 		return buffer;

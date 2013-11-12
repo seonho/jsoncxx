@@ -9,6 +9,8 @@
 #pragma once
 
 #include "jsoncxx.hpp"
+#include <fstream> // ifstream
+#include <sstream> // for ostringstream
 
 namespace jsoncxx
 {

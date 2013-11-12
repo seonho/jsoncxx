@@ -134,5 +134,7 @@ private:
 	size_type	nestingLevel_;
 };
 
+typedef writer<StringStream> Writer;
+
 }
 

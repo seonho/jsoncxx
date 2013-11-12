@@ -457,26 +457,6 @@ public:
 		return value_.a[index];
 	}
 
-	/*template <typename T>
-	inline self_type& operator [] (const T* key);
-
-	template <>
-	inline self_type& operator [] (const char_type* key)
-	{
-		generic_string _key(key);
-		return (*this)[_key];
-	}
-
-	template <typename T>
-	inline const self_type& operator [] (const T* key) const;
-
-	template <>
-	inline const self_type& operator [] (const char_type* key) const
-	{
-		generic_string _key(key);
-		return (*this)[_key];
-	}*/
-
 	inline self_type& operator [] (const generic_string& key)
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
@@ -497,51 +477,11 @@ public:
 		return (value_.o)[key];
 	}
 
-	/*explicit inline self_type& operator [] (const self_type& key)
-	{
-		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
-
-		if (type_ == NullType)
-			*this = std::move(self_type(ObjectType));
-
-		return (value_.o)[key];
-	}*/
-
 	inline void insert(self_type&& key, self_type&& value)
 	{
 		(value_.o)[key] = value;
 	}
-
-
-	//inline self_type& operator= (self_type& rhs)
-	//{
-	//	if (this != &rhs) {
-	//		clear();
-
-	//		type_ = rhs.type_;
-	//		rhs.type_ = NullType;
-
-	//		switch (type_) {
-	//		case ObjectType:
-	//			value_.o = rhs.value_.o;
-	//			break;
-	//		case ArrayType:
-	//			value_.a = rhs.value_.a;
-	//			break;
-	//		case StringType:
-	//			value_.s = rhs.value_.s;
-	//			break;
-	//		case NumberType:
-	//			value_.n = rhs.value_.n;
-	//			break;
-	//		default:
-	//			; // do nothing
-	//		}
-	//	}
-
-	//	return *this;
-	//}
-
+	
 	//! move assignment operator.
 	inline self_type& operator= (self_type&& rhs)
 	{
@@ -570,13 +510,6 @@ public:
 		JSONCXX_ASSERT(type_ == TrueType || type_ == FalseType);
 		return (type_ == TrueType);
 	}
-
-	//!
-	/*const char_type* asString() const
-	{
-		JSONCXX_ASSERT(type_ == StringType);
-		return value_.s.str_->c_str();
-	}*/
 
 	//! 
 	const generic_string& asString() const
@@ -617,7 +550,7 @@ public:
 		return value_.o;
 	}
 
-	friend std::ostream& operator << (std::ostream& stream, const generic_value& value)
+	friend std::basic_ostream<char_type, std::char_traits<char_type> >& operator << (std::basic_ostream<char_type, std::char_traits<char_type> >& stream, const generic_value& value)
 	{
 		switch (value.type()) {
 		case NullType:
