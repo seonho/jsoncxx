@@ -344,10 +344,6 @@ public:
 		//bool status = true;
 		while (true/*status*/) {
 			switch (s.peek()) {
-			case '\\': // escape
-				break;
-			case 'u': // unicode
-				break;
 			case '\"':
 				// add string
 				ret = generic_value<Encoding>(stream.src_ + 1, s.src_); // without '\"'
@@ -356,6 +352,8 @@ public:
 				return ret;
 			case '\0':
 				throw std::runtime_error("Lacks ending quation before the the end of string");
+			case '\\':
+				throw std::runtime_error("Currently not supported!");
 			default:
 				s.take(); // normal character
 			}
