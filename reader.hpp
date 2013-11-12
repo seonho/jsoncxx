@@ -9,7 +9,6 @@
 #pragma once
 
 #include "jsoncxx.hpp"
-#include <regex>
 
 namespace jsoncxx
 {
