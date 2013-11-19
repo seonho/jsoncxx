@@ -624,7 +624,7 @@ typedef generic_value<UTF8<> > Value;
 
 namespace std {
 
-// template specialization for std::hash<generic_value<Encoding> >
+//! template specialization of std::hash for #generic_value type
 template <typename Encoding>
 struct hash<jsoncxx::generic_value<Encoding> >
 	: public unary_function<jsoncxx::generic_value<Encoding>, size_t>
@@ -640,7 +640,7 @@ struct hash<jsoncxx::generic_value<Encoding> >
 	}
 };
 
-// template specialization for std::equal_to
+//! template specialization of std::equal_to for #generic_value type
 template <typename Encoding>
 struct equal_to<jsoncxx::generic_value<Encoding> >
 	: public binary_function<jsoncxx::generic_value<Encoding>, jsoncxx::generic_value<Encoding>, bool>
