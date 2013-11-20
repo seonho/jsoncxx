@@ -2,7 +2,7 @@
  *	@file		value.hpp
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
- *	@copyright	2007-2013 seonho.oh@gmail.com, 2011-2012 Milo Yip (miloyip@gmail.com)
+ *	@copyright	2007-2013 seonho.oh@gmail.com
  *	@version	1.0
  */
 

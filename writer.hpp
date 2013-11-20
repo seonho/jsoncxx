@@ -62,8 +62,8 @@ public:
 	}
 
 protected:
-	//@name	
-	//@{
+	//!	@name	Internal functions
+	//!	@{
 	void writeNull()
 	{
 		stream_.put('n'); stream_.put('u'); stream_.put('l'); stream_.put('l');
@@ -125,13 +125,13 @@ protected:
 		stream_.put('}');
 	}
 
-	//@}
+	//!	@}
 
 protected:
 	//!
 private:
-	Stream&		stream_;
-	size_type	nestingLevel_;
+	Stream&		stream_;		///< 
+	size_type	nestingLevel_;	///< 
 };
 
 typedef writer<StringStream> Writer;

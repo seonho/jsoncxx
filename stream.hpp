@@ -17,7 +17,6 @@ namespace jsoncxx {
 //	Modified by Seonho Oh(seonho.oh@gmail.com)
 //	Original code by 
 //		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
-//		Version 0.11
 //
 /*! \class jsoncxx::stream
 	\brief Concept for reading and writing characters.
@@ -64,7 +63,10 @@ inline void putN(Stream& stream, CharType c, size_t n) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // StringStream
-
+//	Modified by Seonho Oh(seonho.oh@gmail.com)
+//	Original code by 
+//		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
+//
 //! Read-only string stream.
 /*! \implements Stream
 */
@@ -90,7 +92,10 @@ typedef generic_stringstream<UTF8<> > StringStream;
 
 ///////////////////////////////////////////////////////////////////////////////
 // InsituStringStream
-
+//	Modified by Seonho Oh(seonho.oh@gmail.com)
+//	Original code by 
+//		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
+//
 //! A read-write string stream.
 /*! This string stream is particularly designed for in-situ parsing.
 	\implements Stream

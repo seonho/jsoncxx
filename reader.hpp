@@ -17,7 +17,7 @@ namespace jsoncxx
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseType
-
+//
 //! Combination of parse flag
 enum ParseFlag : unsigned int
 {
@@ -117,6 +117,7 @@ template<> inline void SkipWhitespace(stringstream& stream) {
 }
 #endif // JSONCXX_SIMD
 
+//!	Defines parsing error exception
 class parsing_error
 	: public std::runtime_error
 {
@@ -151,6 +152,7 @@ private:
 
 #define JSONCXX_PARSING_ERROR(msg) throw parsing_error(msg, __FILE__, __LINE__, __FUNCTION__)
 
+//!	Generic reader class
 template <typename Stream, typename Encoding = UTF8<> >
 class generic_reader
 {
@@ -171,7 +173,8 @@ public:
 		}
 		return false;
 	}
-
+	
+	//!	Parse stream and get root object
 	bool parse(Stream& stream, generic_value<Encoding>& root, ParseFlag flag = ParseDefault)
 	{
 		// comment string "//"
