@@ -210,6 +210,8 @@ public:
 	}
 
 private:
+	//!	@brief	Parse object from stream
+	//!			object:{name:value, ...}
 	generic_value<Encoding> parseObject(Stream& stream, ParseFlag flag)
 	{
 		generic_value<Encoding> ret(ObjectType);
@@ -249,7 +251,8 @@ private:
 		return ret;
 	}
 
-	//! Parse array: [ value, ... ]
+	//!	@brief	Parse array from stream
+	//!			array: [ value, ... ]
 	generic_value<Encoding> parseArray(Stream& stream, ParseFlag flag)
 	{
 		generic_value<Encoding> ret(ArrayType);
@@ -277,6 +280,7 @@ private:
 		return ret;
 	}
 
+	//!	@brief	Parse null value from stream
 	generic_value<Encoding> parseNull(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 'n');
@@ -290,6 +294,7 @@ private:
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
+	//!	@brief	Parse true value from stream
 	generic_value<Encoding> parseTrue(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 't');
@@ -303,6 +308,7 @@ private:
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
+	//!	@brief	Parse false value from stream
 	generic_value<Encoding> parseFalse(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 'f');
@@ -317,6 +323,7 @@ private:
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
+	//!	@brief	Parse number value from stream
 	generic_value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
 	{
 		Stream s = stream; // Local copy for optimization
@@ -341,6 +348,7 @@ private:
 		return ret;
 	}
 
+	//!	@brief	Parse string value from stream
 	generic_value<Encoding> parseString(Stream& stream, ParseFlag flag)
 	{
 		generic_value<Encoding> ret;
