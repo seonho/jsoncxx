@@ -13,22 +13,22 @@
 namespace jsoncxx
 {
 
+//!	Generic writer class
 template <typename Stream, typename Encoding = UTF8<> >
-class writer
+class Writer
 {
-	typedef typename generic_value<Encoding>::number	Number;
-	typedef typename generic_value<Encoding>::string	String;
-	typedef typename generic_value<Encoding>::array		Array;
-	typedef typename generic_value<Encoding>::object	Object;
-	typedef std::basic_string<typename Encoding::char_type> generic_string;
-
 public:
 	typedef typename Encoding::char_type char_type;
+	typedef typename Value<Encoding>::Number	Number;
+	typedef typename Value<Encoding>::String	String;
+	typedef typename Value<Encoding>::Array		Array;
+	typedef typename Value<Encoding>::Object	Object;
+	typedef std::basic_string<char_type>		string;
 
-	writer(Stream& stream, size_type nestingLevel = 0)
+	Writer(Stream& stream, size_type nestingLevel = 0)
 		: stream_(stream), nestingLevel_(nestingLevel) {}
 
-	writer& operator << (const generic_value<Encoding>& value)
+	Writer& operator << (const Value<Encoding>& value)
 	{
 		switch (value.type()) {
 		case NullType:
@@ -55,7 +55,7 @@ public:
 		return *this;
 	}
 
-	writer& operator << (const char_type* str)
+	Writer& operator << (const char_type* str)
 	{
 		stream_ << str;
 		return *this;
@@ -86,7 +86,7 @@ protected:
 			stream_ << n.num_.r;
 	}
 
-	void writeString(const generic_string& s)
+	void writeString(const string& s)
 	{
 		stream_.put('\"');
 		stream_ << s.c_str();
@@ -97,7 +97,7 @@ protected:
 	{
 		stream_.put('[');
 		
-		std::for_each(a.begin(), std::next(a.begin(), a.size() - 1), [&](const generic_value<Encoding>& value) {
+		std::for_each(a.begin(), std::next(a.begin(), a.size() - 1), [&](const Value<Encoding>& value) {
 			(*this) << value;
 			stream_.put(',');
 		});
@@ -134,7 +134,7 @@ private:
 	size_type	nestingLevel_;	///< 
 };
 
-typedef writer<StringStream> Writer;
+//!	Define writer for UTF8 StringStream
+typedef Writer<stringstream> writer;
 
 }
-

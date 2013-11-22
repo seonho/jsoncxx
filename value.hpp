@@ -15,11 +15,12 @@
 #include <unordered_map>
 #include <algorithm>	// for_each
 #include <functional>	// mem_fun
+#include <codecvt>		// code conversion
 
 namespace jsoncxx
 {
 
-//! Represents a JSON value. Use Value for UTF8 encoding.
+//! Represents a JSON value. Use value for UTF8 encoding.
 /*!
 	A JSON value can be one of types. This class is a variant type supporting these types.
 
@@ -28,18 +29,18 @@ namespace jsoncxx
 */
 #pragma pack (push, 4)
 template <typename Encoding>
-class generic_value
+class Value
 {
 public:
-	typedef Encoding encoding_type;		//!< Encoding type from the template parameter.
-	typedef typename Encoding::char_type char_type;	//!< Character type derived from Encoding.
-	typedef std::basic_string<typename Encoding::char_type> generic_string;
+	typedef Encoding						encoding_type;		//!< Encoding type from the template parameter.
+	typedef typename Encoding::char_type	char_type;	//!< Character type derived from Encoding.
+	typedef std::basic_string<char_type>	string;
+	typedef Value<Encoding>					self_type;
+	typedef std::basic_ostream<char_type, std::char_traits<char_type> >	ostream;
 
-	typedef generic_value<Encoding>	self_type;
-
-	struct number
+	struct Number
 	{
-		union numeric_holder
+		union NumberHolder
 		{
 			natural	n;
 			real	r;
@@ -48,15 +49,15 @@ public:
 		NumericType type_;
 	};
 
-	struct string
+	struct String
 	{
-		generic_string*	str_;
-		size_type		hash_;
+		string*		str_;
+		size_type	hash_;
 	};
 
-	struct array
+	struct Array
 	{
-		typedef generic_value<Encoding>	element_type;	//!< itself
+		typedef Value<Encoding>	element_type;	//!< itself
 		typedef std::list<element_type>	storage_type;	//!< storage type
 
 		storage_type* elements_;
@@ -108,25 +109,25 @@ public:
 		const element_type& back() const { return elements_->back(); }
 	};
 
-	struct object
+	struct Object
 	{
-		typedef generic_value<Encoding> key_type;	//!< string type value
-		typedef generic_value<Encoding>	value_type;	//!< any value
+		typedef Value<Encoding>	key_type;	//!< string type value
+		typedef Value<Encoding>	value_type;	//!< any value
 
 		struct hash_from_member
-			: public std::unary_function<jsoncxx::generic_value<Encoding>, size_t>
+			: public std::unary_function<Value<Encoding>, size_t>
 		{
-			size_t operator()(const typename jsoncxx::generic_value<Encoding>& _Keyval) const
+			size_t operator()(const typename Value<Encoding>& _Keyval) const
 			{
-				if(_Keyval.type() != jsoncxx::StringType)
+				if(_Keyval.type() != StringType)
 					throw std::runtime_error("Non-String type Value cannot have hash value!");
 
 				return _Keyval.value_.s.hash_;
 			}
 		};
 		
-		typedef std::unordered_map<key_type, value_type, hash_from_member> storage_type;
-		typedef typename storage_type::value_type		member_type;
+		typedef std::unordered_map<key_type, value_type, hash_from_member>	storage_type;
+		typedef typename storage_type::value_type							member_type;
 				
 		storage_type* members_;
 
@@ -145,7 +146,7 @@ public:
 			return members_->empty();
 		}
 
-		value_type& operator [] (const generic_string& key)
+		value_type& operator [] (const string& key)
 		{
 			key_type _key = make_key(key);
 			auto itr = members_->find(_key);
@@ -165,7 +166,7 @@ public:
 			return ((*(bi.first)).second);
 		}
 
-		const value_type& operator [] (const generic_string& key) const
+		const value_type& operator [] (const string& key) const
 		{
 			key_type _key = make_key(key);
 			auto itr = members_->find(_key);
@@ -180,7 +181,7 @@ public:
 			JSONCXX_ASSERT(key.type() == StringType);
 
 			// make hash key
-			key.value_.s.hash_ = std::hash<generic_string>()(*key.value_.s.str_);
+			key.value_.s.hash_ = std::hash<string>()(*key.value_.s.str_);
 
 			auto itr = members_->find(key);
 			if (itr != members_->end())
@@ -208,12 +209,12 @@ public:
 	};
 
 protected:
-	union value_holder
+	union ValueHolder
 	{
-		string	s;
-		number	n;
-		object	o;
-		array	a;
+		String	s;
+		Number	n;
+		Object	o;
+		Array	a;
 	};
 
 public:
@@ -224,10 +225,10 @@ public:
 	}
 
 	//! default ctor creates a null value.
-	generic_value() : type_(NullType) {}
+	Value() : type_(NullType) {}
 
 	//! move ctor.
-	generic_value(generic_value&& rhs)
+	Value(Value&& rhs)
 		: type_(rhs.type_)
 	{
 		std::swap(value_, rhs.value_);
@@ -236,22 +237,22 @@ public:
 	}
 
 	//! copy ctor
-	explicit generic_value(const generic_value& rhs)
+	explicit Value(const Value& rhs)
 		: type_(rhs.type_)
 	{
 		switch (type_) {
 		case ObjectType:
-			value_.o.members_ = new object::storage_type;
+			value_.o.members_ = new Object::storage_type;
 			// copy internal memory as well
 			value_.o.members_->insert(rhs.value_.o.begin(), rhs.value_.o.end());
 			break;
 		case ArrayType:
-			value_.a.elements_ = new array::storage_type;
+			value_.a.elements_ = new Array::storage_type;
 			// copy internal memory as well
 			value_.a.elements_->assign(rhs.value_.a.begin(), rhs.value_.a.end());
 			break;
 		case StringType:
-			value_.s.str_ = new generic_string(*(rhs.value_.s.str_));
+			value_.s.str_ = new string(*(rhs.value_.s.str_));
 			value_.s.hash_ = rhs.value_.s.hash_;
 			break;
 		case NumberType:
@@ -264,7 +265,7 @@ public:
 
 	//! ctor for numeric types
 	template <typename T>
-	generic_value(T value, typename std::enable_if<std::is_arithmetic<T>::value, T>::type *p = nullptr)
+	Value(T value, typename std::enable_if<std::is_arithmetic<T>::value, T>::type *p = nullptr)
 		: type_(NumberType)
 	{
 		if (std::is_floating_point<T>::value) {
@@ -282,83 +283,83 @@ public:
 		}
 	}
 		
-	generic_value(bool value)
+	Value(bool value)
 		: type_(value ? TrueType : FalseType)
 	{
 	}
 
-	generic_value(const char_type* value)
+	Value(const char_type* value)
 		: type_(StringType)
 	{
 		// copy string
-		value_.s.str_ = new generic_string(value);
-		//value_.s.hash_ = std::hash<generic_string>()(*value_.s.str_);
+		value_.s.str_ = new string(value);
+		//value_.s.hash_ = std::hash<string>()(*value_.s.str_);
 	}
 
-	//! ctor for generic_string
-	generic_value(const generic_string& value)
+	//! ctor for string
+	Value(const string& value)
 		: type_(StringType)
 	{
 		//value_.s.str_ = ;
 		//std::swap(*(value_.s.str_), value);
-		value_.s.str_ = new generic_string(value);
-		//value_.s.hash_ = std::hash<generic_string>()(value);
+		value_.s.str_ = new string(value);
+		//value_.s.hash_ = std::hash<string>()(value);
 	}
 	
 	//! ctor
-	generic_value(const char_type* begin, const char_type* end)
+	Value(const char_type* begin, const char_type* end)
 		: type_(StringType)
 	{
-		value_.s.str_ = new std::string(begin, end);
+		value_.s.str_ = new string(begin, end);
 	}
 
 	//! Default dtor.
-	~generic_value()
+	~Value()
 	{
 		clear();
 	}
 
 	//! assignment with primitive types
 	template <typename T>
-	generic_value& operator= (T value)
+	Value& operator= (T value)
 	{
-		this->~generic_value();
-		new (this) generic_value(value);
+		this->~Value();
+		new (this) Value(value);
 		return *this;
 	}
 
-	generic_value& operator= (const generic_value& rhs)
+	Value& operator= (const Value& rhs)
 	{
-		this->~generic_value();
-		new (this) generic_value(rhs); // reuse constructor
+		this->~Value();
+		new (this) Value(rhs); // reuse constructor
 		return *this;
 	}
 
 private:
 	//! 
-	static typename object::key_type make_key(const generic_string& key)
+	static typename Object::key_type make_key(const string& key)
 	{
-		typedef typename object::key_type key_type;
+		typedef typename Object::key_type key_type;
 		key_type _key(key);
-		_key.value_.s.hash_ = std::hash<generic_string>()(key);
+		_key.value_.s.hash_ = std::hash<string>()(key);
 		return _key;
 	}
 
 public:
 	//! ctor with JSON value type.
-	generic_value(ValueType type): type_(type)
+	Value(ValueType type): type_(type)
 	{
-		memset(&value_, 0, sizeof(value_holder));
+		memset(&value_, 0, sizeof(ValueHolder));
 
 		switch (type_) {
 		case ObjectType:
-			value_.o.members_ = new object::storage_type;
+			value_.o.members_ = new Object::storage_type;
 			break;
 		case ArrayType:
-			value_.a.elements_ = new array::storage_type;
+			value_.a.elements_ = new Array::storage_type;
 			break;
 		case StringType:
-			value_.s.str_ = new generic_string();
+			value_.s.str_ = new string();
 			break;
 		default:
 			; // do nothing
@@ -389,7 +390,7 @@ public:
 				break;
 			}
 
-			memset(&value_, 0, sizeof(value_holder));
+			memset(&value_, 0, sizeof(ValueHolder));
 			type_ = NullType;
 		}
 	}
@@ -457,7 +458,7 @@ public:
 		return value_.a[index];
 	}
 
-	inline self_type& operator [] (const generic_string& key)
+	inline self_type& operator [] (const string& key)
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
 
@@ -467,7 +468,7 @@ public:
 		return (value_.o)[key];
 	}
 
-	inline const self_type& operator [] (const generic_string& key) const
+	inline const self_type& operator [] (const string& key) const
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
 
@@ -512,7 +513,7 @@ public:
 	}
 
 	//! 
-	const generic_string& asString() const
+	const string& asString() const
 	{
 		JSONCXX_ASSERT(type_ == StringType);
 		return *(value_.s.str_);
@@ -532,45 +533,48 @@ public:
 		return value_.n.num_.r;
 	}
 
-	const number& asNumber() const
+	const Number& asNumber() const
 	{
 		JSONCXX_ASSERT(type_ == NumberType);
 		return value_.n;
 	}
 
-	const array& asArray() const
+	const Array& asArray() const
 	{
 		JSONCXX_ASSERT(type_ == ArrayType);
 		return value_.a;
 	}
 
-	const object& asObject() const
+	const Object& asObject() const
 	{
 		JSONCXX_ASSERT(type_ == ObjectType);
 		return value_.o;
 	}
 
-	friend std::basic_ostream<char_type, std::char_traits<char_type> >& operator << (std::basic_ostream<char_type, std::char_traits<char_type> >& stream, const generic_value& value)
+	friend ostream& operator << (ostream& stream, const Value& value)
 	{
 		switch (value.type()) {
 		case NullType:
 			stream << "null";
+			//stream.put("n");
 			break;
 		case FalseType:
 			stream << "false";
+			//stream.put("f");
 			break;
 		case TrueType:
 			stream << "true";
+			//stream.put("t");
 			break;
 		case ObjectType:
 			{
 				stream << '{'; // Object begin
 
-				const object& o = value.asObject();
+				const Object& o = value.asObject();
 
 				// lambda function variable
-				auto func = [&](const typename object::member_type& p) -> generic_string {
-					std::ostringstream oss;
+				auto func = [&](const typename Object::member_type& p) -> string {
+					std::basic_ostringstream<char_type> oss;
 					oss << p.first
 						<< " : " 
 						<< p.second;
@@ -578,7 +582,7 @@ public:
 				};
 
 				std::transform(o.begin(), std::next(o.begin(), value.size() - 1), 
-								std::ostream_iterator<generic_string>(stream, ", "), 
+								std::ostream_iterator<string, char_type>(stream, ", "), 
 								func);
 				stream << func(*std::next(o.begin(), value.size() - 1));
 
@@ -588,9 +592,11 @@ public:
 		case ArrayType:
 			{
 				stream << '['; // Array begin
+
+				// get delimiter
 				
-				const array& a = value.asArray();
-				std::copy(a.begin(), std::next(a.begin(), value.size() - 1), std::ostream_iterator<const generic_value<Encoding>&>(stream, ", "));
+				const Array& a = value.asArray();
+				std::copy(a.begin(), std::next(a.begin(), value.size() - 1), std::ostream_iterator<const Value<Encoding>&>(stream, ", "));
 				stream << a.back();
 
 				stream << ']'; // Array end
@@ -613,40 +619,41 @@ public:
 	}
 
 private:
-	value_holder	value_;
+	ValueHolder	value_;
 	ValueType		type_;
 };
 #pragma pack (pop)
 
-typedef generic_value<UTF8<> > Value;
+//!	Define value for UTF8 encoding
+typedef Value<UTF8<> > value;
 
 }
 
 namespace std {
 
-//! template specialization of std::hash for #generic_value type
+//! template specialization of std::hash for #Value type
 template <typename Encoding>
-struct hash<jsoncxx::generic_value<Encoding> >
-	: public unary_function<jsoncxx::generic_value<Encoding>, size_t>
+struct hash<jsoncxx::Value<Encoding> >
+	: public unary_function<jsoncxx::Value<Encoding>, size_t>
 {
-	typedef std::basic_string<typename Encoding::char_type> generic_string;
+	typedef std::basic_string<typename Encoding::char_type> string;
 
-	size_t operator()(const typename jsoncxx::generic_value<Encoding>& _Keyval) const
+	size_t operator()(const typename jsoncxx::Value<Encoding>& _Keyval) const
 	{
 		if(_Keyval.type() != jsoncxx::StringType)
 			throw std::runtime_error("Non-String type Value cannot have hash value!");
 
-		return hash<generic_string>()(_Keyval.asString());
+		return hash<string>()(_Keyval.asString());
 	}
 };
 
-//! template specialization of std::equal_to for #generic_value type
+//! template specialization of std::equal_to for #Value type
 template <typename Encoding>
-struct equal_to<jsoncxx::generic_value<Encoding> >
-	: public binary_function<jsoncxx::generic_value<Encoding>, jsoncxx::generic_value<Encoding>, bool>
+struct equal_to<jsoncxx::Value<Encoding> >
+	: public binary_function<jsoncxx::Value<Encoding>, jsoncxx::Value<Encoding>, bool>
 {
-	bool operator() (const typename jsoncxx::generic_value<Encoding>& lhs, 
-					 const typename jsoncxx::generic_value<Encoding>& rhs) const {
+	bool operator() (const typename jsoncxx::Value<Encoding>& lhs, 
+					 const typename jsoncxx::Value<Encoding>& rhs) const {
 		return lhs.asString().compare(rhs.asString()) == 0;
 	}
 };

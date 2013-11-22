@@ -107,7 +107,7 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
 
 #ifdef JSONCXX_SIMD
 //! Template function specialization for inplace_stringstream
-template<> inline void SkipWhitespace(inplace_stringstream& stream) { 
+template<> inline void SkipWhitespace(insitustringstream& stream) { 
 	stream.src_ = const_cast<char*>(SkipWhitespace_SIMD(stream.src_));
 }
 
@@ -154,28 +154,36 @@ private:
 
 //!	Generic reader class
 template <typename Stream, typename Encoding = UTF8<> >
-class generic_reader
+class Reader
 {
 public:
-	typedef typename Encoding::char_type char_type;
+	typedef typename Encoding::char_type	char_type;
+	typedef std::basic_string<char_type>	string;
+	typedef std::basic_ifstream<char_type>	ifstream;
 
 	//! ctor
-	generic_reader() {}
+	Reader() {}
 
-	bool parse(const char* filename, generic_value<Encoding>& root)
+	bool parse(const char* filename, Value<Encoding>& root)
 	{
-		std::ifstream fin(filename);
+		ifstream fin(filename);
+
+		// for UTF16
+		if (std::is_same<char_type, char16_t>::value)
+			fin.imbue(std::locale(fin.getloc(), 
+				new std::codecvt_utf16<char16_t, 0x10ffff, std::consume_header>));
+
 		if (fin.is_open()) {
-			std::string json;
-			std::getline(fin, json, (char)EOF);
-			generic_stringstream<Encoding> s(json.c_str());
+			string json;
+			std::getline(fin, json, (char_type)EOF);
+			StringStream<Encoding> s(json.c_str());
 			return parse(s, root);
 		}
 		return false;
 	}
 	
 	//!	Parse stream and get root object
-	bool parse(Stream& stream, generic_value<Encoding>& root, ParseFlag flag = ParseDefault)
+	bool parse(Stream& stream, Value<Encoding>& root, ParseFlag flag = ParseDefault)
 	{
 		// comment string "//"
 		// /* */
@@ -212,9 +220,9 @@ public:
 private:
 	//!	@brief	Parse object from stream
 	//!			object:{name:value, ...}
-	generic_value<Encoding> parseObject(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseObject(Stream& stream, ParseFlag flag)
 	{
-		generic_value<Encoding> ret(ObjectType);
+		Value<Encoding> ret(ObjectType);
 
 		assert(stream.peek() == '{');
 		stream.take(); // skip '{'
@@ -229,7 +237,7 @@ private:
 			if (stream.peek() != '"')
 				JSONCXX_PARSING_ERROR("Name of an object member must be a string"); // stream.tell();
 
-			generic_value<Encoding> key = parseString(stream, flag);
+			Value<Encoding> key = parseString(stream, flag);
 			SkipWhitespace(stream);
 
 			if (stream.take() != ':')
@@ -253,9 +261,9 @@ private:
 
 	//!	@brief	Parse array from stream
 	//!			array: [ value, ... ]
-	generic_value<Encoding> parseArray(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseArray(Stream& stream, ParseFlag flag)
 	{
-		generic_value<Encoding> ret(ArrayType);
+		Value<Encoding> ret(ArrayType);
 
 		assert(stream.peek() == '[');
 		stream.take(); // skip '['
@@ -281,7 +289,7 @@ private:
 	}
 
 	//!	@brief	Parse null value from stream
-	generic_value<Encoding> parseNull(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseNull(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 'n');
 		stream.take();
@@ -289,13 +297,13 @@ private:
 		if (stream.take() == 'u' && 
 			stream.take() == 'l' &&
 			stream.take() == 'l')
-			return generic_value<Encoding>(); // null
+			return Value<Encoding>(); // null
 		else
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	//!	@brief	Parse true value from stream
-	generic_value<Encoding> parseTrue(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseTrue(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 't');
 		stream.take();
@@ -303,13 +311,13 @@ private:
 		if (stream.take() == 'r' && 
 			stream.take() == 'u' &&
 			stream.take() == 'e')
-			return generic_value<Encoding>(TrueType); // true
+			return Value<Encoding>(TrueType); // true
 		else
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	//!	@brief	Parse false value from stream
-	generic_value<Encoding> parseFalse(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseFalse(Stream& stream, ParseFlag flag)
 	{
 		assert(stream.peek() == 'f');
 		stream.take();
@@ -318,13 +326,13 @@ private:
 			stream.take() == 'l' &&
 			stream.take() == 's' &&
 			stream.take() == 'e')
-			return generic_value<Encoding>(FalseType); // false
+			return Value<Encoding>(FalseType); // false
 		else
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
 
 	//!	@brief	Parse number value from stream
-	generic_value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
 	{
 		Stream s = stream; // Local copy for optimization
 		
@@ -334,14 +342,14 @@ private:
 				s.peek() == 'e' || s.peek() == 'E' ||
 				s.peek() == '-' || s.peek() == '+') s.take();
 
-		generic_value<Encoding> ret;
+		Value<Encoding> ret;
 
 		std::string number(stream.src_, s.src_);
 
 		if (number.find_first_of('.') == std::string::npos)
-			ret = std::move(generic_value<Encoding>((natural)std::stoll(number)));
+			ret = std::move(Value<Encoding>((natural)std::stoll(number)));
 		else
-			ret = std::move(generic_value<Encoding>((real)std::stod(number)));
+			ret = std::move(Value<Encoding>((real)std::stod(number)));
 
 		stream = s;
 
@@ -349,9 +357,10 @@ private:
 	}
 
 	//!	@brief	Parse string value from stream
-	generic_value<Encoding> parseString(Stream& stream, ParseFlag flag)
+	//!	@note	Current version do not support "u" literal, 4 hexadecimal digits
+	Value<Encoding> parseString(Stream& stream, ParseFlag flag)
 	{
-		generic_value<Encoding> ret;
+		Value<Encoding> ret;
 		Stream s = stream;
 		assert(s.peek() == '\"');
 		s.take(); // skip '\"'
@@ -367,7 +376,7 @@ private:
 		while (true) {
 			switch (s.peek()) {
 			case '\"':
-				ret = generic_value<Encoding>(stream.src_ + 1, s.src_); // without '\"'
+				ret = Value<Encoding>(stream.src_ + 1, s.src_); // without '\"'
 				s.take();
 				stream = s;
 				return ret;
@@ -381,7 +390,7 @@ private:
 	}
 
 	//! Parse any JSON value
-	generic_value<Encoding> parseValue(Stream& stream, ParseFlag flag)
+	Value<Encoding> parseValue(Stream& stream, ParseFlag flag)
 	{
 		switch (stream.peek()) {
 		case 'n': return parseNull  (stream, flag);
@@ -396,7 +405,7 @@ private:
 	}
 };
 
-//! Reader with UTF8 encoding.
-typedef generic_reader<generic_stringstream<UTF8<> >, UTF8<> > Reader;
+//! Define reader for UTF8 encoding.
+typedef Reader<StringStream<UTF8<> >, UTF8<> > reader;
 
 }

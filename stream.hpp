@@ -40,7 +40,7 @@ concept Stream {
 	size_t tell();
 
 	//! Begin writing operation at the current read pointer.
-	//! \return The begin writer pointer.
+	//! \return The begin Writer pointer.
 	char_type* begin();
 
 	//! Write a character.
@@ -71,10 +71,10 @@ inline void putN(Stream& stream, CharType c, size_t n) {
 /*! \implements Stream
 */
 template <typename Encoding>
-struct generic_stringstream {
+struct StringStream {
 	typedef typename Encoding::char_type char_type;
 
-	generic_stringstream(const char_type *src) : src_(src), head_(src) {}
+	StringStream(const char_type *src) : src_(src), head_(src) {}
 
 	inline char_type peek() const { return *src_; }
 	inline char_type take() { return *src_++; }
@@ -88,7 +88,8 @@ struct generic_stringstream {
 	const char_type* head_;	//!< Original head of the string.
 };
 
-typedef generic_stringstream<UTF8<> > StringStream;
+//!	Define stringstream for UTF8 encoding
+typedef StringStream<UTF8<> > stringstream;
 
 ///////////////////////////////////////////////////////////////////////////////
 // InsituStringStream
@@ -101,10 +102,10 @@ typedef generic_stringstream<UTF8<> > StringStream;
 	\implements Stream
 */
 template <typename Encoding>
-struct generic_inplace_stringstream {
+struct InsituStringStream {
 	typedef typename Encoding::char_type char_type;
 
-	generic_inplace_stringstream(char_type *src) : src_(src), dst_(0), head_(src) {}
+	InsituStringStream(char_type *src) : src_(src), dst_(0), head_(src) {}
 
 	// Read
 	char_type peek() { return *src_; }
@@ -121,6 +122,7 @@ struct generic_inplace_stringstream {
 	char_type* head_;
 };
 
-typedef generic_inplace_stringstream<UTF8<> > InplaceStringStream;
+//!	Define insitustringstream for UTF8 encoding
+typedef InsituStringStream<UTF8<> > insitustringstream;
 
 }
