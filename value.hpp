@@ -636,7 +636,7 @@ typedef Value<UTF8<> > value;
 
 namespace std {
 
-//! template specialization of std::hash for #Value type
+//! template specialization of std::hash for Value type
 template <typename Encoding>
 struct hash<jsoncxx::Value<Encoding> >
 	: public unary_function<jsoncxx::Value<Encoding>, size_t>
@@ -652,7 +652,7 @@ struct hash<jsoncxx::Value<Encoding> >
 	}
 };
 
-//! template specialization of std::equal_to for #Value type
+//! template specialization of std::equal_to for Value type
 template <typename Encoding>
 struct equal_to<jsoncxx::Value<Encoding> >
 	: public binary_function<jsoncxx::Value<Encoding>, jsoncxx::Value<Encoding>, bool>
