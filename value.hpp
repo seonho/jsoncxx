@@ -506,45 +506,53 @@ public:
 		return *this;
 	}
 
+	//! get boolean value
 	bool asBool() const
 	{
 		JSONCXX_ASSERT(type_ == TrueType || type_ == FalseType);
 		return (type_ == TrueType);
 	}
 
-	//! 
+	//! get string value
 	const string& asString() const
 	{
 		JSONCXX_ASSERT(type_ == StringType);
 		return *(value_.s.str_);
 	}
 
-	//!
+	//! get natural value
 	natural asNatural() const
 	{
-		JSONCXX_ASSERT(type_ == NumberType || value_.n.type_ == NaturalNumber);
-		return value_.n.num_.n;
+		JSONCXX_ASSERT(type_ == NumberType);
+		if (value_.n.type_ == NaturalNumber)
+			return value_.n.num_.n;
+		return static_cast<natural>(value_.n.num_.r);
 	}
 
-	//!
+	//! get real value
 	real asReal() const
 	{
-		JSONCXX_ASSERT(type_ == NumberType || value_.n.type_ == RealNumber);
-		return value_.n.num_.r;
+		JSONCXX_ASSERT(type_ == NumberType);
+		if (value_.n.type_ == RealNumber)
+			return value_.n.num_.r;
+		return static_cast<real>(value_.n.num_.n);
 	}
 
+	//! get number
 	const Number& asNumber() const
 	{
 		JSONCXX_ASSERT(type_ == NumberType);
 		return value_.n;
 	}
 
+	//! get array
 	const Array& asArray() const
 	{
 		JSONCXX_ASSERT(type_ == ArrayType);
 		return value_.a;
 	}
 
+	//! get object
 	const Object& asObject() const
 	{
 		JSONCXX_ASSERT(type_ == ObjectType);
@@ -556,15 +564,12 @@ public:
 		switch (value.type()) {
 		case NullType:
 			stream << "null";
-			//stream.put("n");
 			break;
 		case FalseType:
 			stream << "false";
-			//stream.put("f");
 			break;
 		case TrueType:
 			stream << "true";
-			//stream.put("t");
 			break;
 		case ObjectType:
 			{
