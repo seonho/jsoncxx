@@ -38,6 +38,7 @@ public:
 	typedef Value<Encoding>					self_type;
 	typedef std::basic_ostream<char_type, std::char_traits<char_type> >	ostream;
 
+	//!	Represents a number type value.
 	struct Number
 	{
 		union NumberHolder
@@ -49,12 +50,14 @@ public:
 		NumericType type_;
 	};
 
+	//!	Represents a string type value.
 	struct String
 	{
 		string*		str_;
 		size_type	hash_;
 	};
 
+	//!	Represents an array type value.
 	struct Array
 	{
 		typedef Value<Encoding>	element_type;	//!< itself
@@ -109,6 +112,7 @@ public:
 		const element_type& back() const { return elements_->back(); }
 	};
 
+	//!	Represents an object type value.
 	struct Object
 	{
 		typedef Value<Encoding>	key_type;	//!< string type value
@@ -209,6 +213,7 @@ public:
 	};
 
 protected:
+	//!	Internal type union structure
 	union ValueHolder
 	{
 		String	s;
@@ -421,7 +426,7 @@ public:
 		return 0; // unreachable
 	}
 
-	//! 
+	//! Append a value if current value type is array.
 	inline self_type& append(self_type&& value)
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ArrayType);
@@ -433,7 +438,7 @@ public:
 		return value_.a.elements_->back();
 	}
 
-	//! 
+	//! Append a value if current internal type is array.
 	inline self_type& append(const self_type& value)
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ArrayType);
@@ -444,20 +449,21 @@ public:
 		return value_.a.elements_->back();
 	}
 
-	//! 
+	//! Access array element by index.
 	inline self_type& operator [] (const size_type index)
 	{
 		JSONCXX_ASSERT(type_ == ArrayType);
 		return value_.a[index];
 	}
 
-	//! 
+	//! Access array element by index.
 	inline const self_type& operator [] (const size_type index) const
 	{
 		JSONCXX_ASSERT(type_ == ArrayType);
 		return value_.a[index];
 	}
 
+	//!	Access object element by key.
 	inline self_type& operator [] (const string& key)
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
@@ -468,6 +474,7 @@ public:
 		return (value_.o)[key];
 	}
 
+	//!	Access object element by key.
 	inline const self_type& operator [] (const string& key) const
 	{
 		JSONCXX_ASSERT(type_ == NullType || type_ == ObjectType);
@@ -478,6 +485,7 @@ public:
 		return (value_.o)[key];
 	}
 
+	//!	Insert new key-value pair if internal type is object.
 	inline void insert(self_type&& key, self_type&& value)
 	{
 		(value_.o)[key] = value;
@@ -558,7 +566,7 @@ public:
 		JSONCXX_ASSERT(type_ == ObjectType);
 		return value_.o;
 	}
-
+	//! Preliminary implement stream operator
 	friend ostream& operator << (ostream& stream, const Value& value)
 	{
 		switch (value.type()) {

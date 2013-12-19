@@ -1,5 +1,5 @@
 /**
- *	@file		value.hpp
+ *	@file		encoding.hpp
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
  *	@copyright	2007-2013 seonho.oh@gmail.com

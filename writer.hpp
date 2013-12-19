@@ -1,5 +1,5 @@
 /**
- *	@file		value.hpp
+ *	@file		writer.hpp
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
  *	@copyright	2007-2013 seonho.oh@gmail.com
@@ -130,8 +130,8 @@ protected:
 protected:
 	//!
 private:
-	Stream&		stream_;		///< 
-	size_type	nestingLevel_;	///< 
+	Stream&		stream_;		///< stream object
+	size_type	nestingLevel_;	///< nesting level
 };
 
 //!	Define writer for UTF8 StringStream
