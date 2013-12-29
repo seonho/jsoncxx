@@ -9,8 +9,9 @@
 #pragma once
 
 #include "jsoncxx.hpp"
-#include <fstream> // ifstream
-#include <sstream> // for ostringstream
+#include <fstream>  // ifstream
+#include <sstream>  // for ostringstream
+#include <codecvt>  // code conversion
 
 namespace jsoncxx
 {
@@ -167,12 +168,13 @@ public:
 	bool parse(const char* filename, Value<Encoding>& root)
 	{
 		ifstream fin(filename);
-
+        
+#ifdef _MSC_VER
 		// for UTF16
 		if (std::is_same<char_type, char16_t>::value)
 			fin.imbue(std::locale(fin.getloc(), 
 				new std::codecvt_utf16<char16_t, 0x10ffff, std::consume_header>));
-
+#endif
 		if (fin.is_open()) {
 			string json;
 			std::getline(fin, json, (char_type)EOF);

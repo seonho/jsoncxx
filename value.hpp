@@ -15,7 +15,6 @@
 #include <unordered_map>
 #include <algorithm>	// for_each
 #include <functional>	// mem_fun
-#include <codecvt>		// code conversion
 
 namespace jsoncxx
 {
@@ -73,7 +72,7 @@ public:
 
 		inline size_type size() const
 		{
-			return elements_->size();
+			return (size_type)elements_->size();
 		}
 
 		inline bool empty() const
@@ -142,7 +141,7 @@ public:
 
 		inline size_type size() const
 		{
-			return members_->size();
+			return (size_type)members_->size();
 		}
 
 		inline bool empty() const
