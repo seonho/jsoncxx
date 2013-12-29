@@ -11,7 +11,12 @@
 #include "jsoncxx.hpp"
 #include <fstream>  // ifstream
 #include <sstream>  // for ostringstream
+
+#ifdef _MSC_VER
 #include <codecvt>  // code conversion
+#else
+#include <locale>
+#endif
 
 namespace jsoncxx
 {

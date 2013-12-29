@@ -11,7 +11,9 @@
 #include "jsoncxx.hpp"
 
 #include <list>
+#include <cstring>
 #include <string>
+#include <iterator>     // for ostream_iterator
 #include <unordered_map>
 #include <algorithm>	// for_each
 #include <functional>	// mem_fun
@@ -155,7 +157,7 @@ public:
 			auto itr = members_->find(_key);
 			if (itr != members_->end()) {
 				_key.clear();
-				return (*itr).second;
+				return itr->second;
 			}
 
 			// R-value reference
@@ -176,7 +178,7 @@ public:
 
 			if (itr == members_->end())
 				return self_type::null(); // null object
-			return (*itr).second;
+			return itr->second;
 		}
 
 		value_type& operator [] (key_type& key)
@@ -188,7 +190,7 @@ public:
 
 			auto itr = members_->find(key);
 			if (itr != members_->end())
-				return (*itr).second;
+				return itr->second;
 
 			// R-value reference
 			auto bi = members_->emplace(
