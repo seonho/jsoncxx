@@ -54,14 +54,14 @@ public:
 	struct String
 	{
 		string*		str_;
-		size_type	hash_;
+		size_t      hash_;
 	};
 
 	//!	Represents an array type value.
 	struct Array
 	{
-		typedef Value<Encoding>	element_type;	//!< itself
-		typedef std::list<element_type>	storage_type;	//!< storage type
+		typedef Value<Encoding>         element_type;	//!< itself
+		typedef std::list<element_type> storage_type;	//!< storage type
 
 		storage_type* elements_;
 
@@ -78,7 +78,7 @@ public:
 
 		inline bool empty() const
 		{
-			return elements_.empty();
+			return elements_->empty();
 		}
 
 		element_type& operator [] (size_type index)
@@ -121,7 +121,7 @@ public:
 		struct hash_from_member
 			: public std::unary_function<Value<Encoding>, size_t>
 		{
-			size_t operator()(const typename Value<Encoding>& _Keyval) const
+			size_t operator()(const Value<Encoding>& _Keyval) const
 			{
 				if(_Keyval.type() != StringType)
 					throw std::runtime_error("Non-String type Value cannot have hash value!");
@@ -247,12 +247,12 @@ public:
 	{
 		switch (type_) {
 		case ObjectType:
-			value_.o.members_ = new Object::storage_type;
+			value_.o.members_ = new typename Object::storage_type;
 			// copy internal memory as well
 			value_.o.members_->insert(rhs.value_.o.begin(), rhs.value_.o.end());
 			break;
 		case ArrayType:
-			value_.a.elements_ = new Array::storage_type;
+			value_.a.elements_ = new typename Array::storage_type;
 			// copy internal memory as well
 			value_.a.elements_->assign(rhs.value_.a.begin(), rhs.value_.a.end());
 			break;
@@ -358,10 +358,10 @@ public:
 
 		switch (type_) {
 		case ObjectType:
-			value_.o.members_ = new Object::storage_type;
+			value_.o.members_ = new typename Object::storage_type;
 			break;
 		case ArrayType:
-			value_.a.elements_ = new Array::storage_type;
+			value_.a.elements_ = new typename Array::storage_type;
 			break;
 		case StringType:
 			value_.s.str_ = new string();
@@ -393,6 +393,8 @@ public:
 				if (value_.s.str_)
 					delete value_.s.str_;
 				break;
+            default:
+                ;
 			}
 
 			memset(&value_, 0, sizeof(ValueHolder));

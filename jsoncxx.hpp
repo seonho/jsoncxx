@@ -30,7 +30,11 @@ namespace jsoncxx
 	};
 
 	//! Type define of internal number types
+#ifdef _MSC_VER
 	typedef __int64		natural;
+#else
+    typedef long long   natural;
+#endif
 	typedef double		real;
 
 	//! Type of number
