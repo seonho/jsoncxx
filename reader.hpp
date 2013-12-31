@@ -8,29 +8,16 @@
 
 #pragma once
 
-#include "jsoncxx.hpp"
-#include <fstream>  // ifstream
-#include <sstream>  // for ostringstream
+#include "encoding.hpp"
+#include "value.hpp"
 
-#ifdef _MSC_VER
-#include <codecvt>  // code conversion
-#else
-#include <locale>
-#endif
+#include <stdexcept>    // runtime_error
+#include <sstream>      // stringstream
+#include <string>       // basic_stream
+#include <fstream>      // basic_ifstream
 
-namespace jsoncxx
-{
-
-///////////////////////////////////////////////////////////////////////////////
-// ParseType
-//
-//! Combination of parse flag
-enum ParseFlag : unsigned int
-{
-	ParseDefault,	//!< Default parse type. Non-destructive parsing. Text strings are decoded into allocated buffer.
-	ParseInplace	//!< Inplace(destructive) parsing.
-};
-
+namespace jsoncxx {
+    
 ///////////////////////////////////////////////////////////////////////////////
 // SkipWhitespace
 // Copyright (c) 2011 Milo Yip (miloyip@gmail.com)
@@ -38,75 +25,75 @@ enum ParseFlag : unsigned int
 
 //! Skip the JSON white spaces in a stream.
 /*! \param stream A input stream for skipping white spaces.
-	\note This function has SSE2/SSE4.2 specialization.
-*/
+ \note This function has SSE2/SSE4.2 specialization.
+ */
 template<typename Stream>
 void SkipWhitespace(Stream& stream) {
-	Stream s = stream;	// Use a local copy for optimization
-	while (s.peek() == ' ' || s.peek() == '\n' || s.peek() == '\r' || s.peek() == '\t')
-		s.take();
-	stream = s;
+    Stream s = stream;	// Use a local copy for optimization
+    while (s.peek() == ' ' || s.peek() == '\n' || s.peek() == '\r' || s.peek() == '\t')
+        s.take();
+    stream = s;
 }
 
 #ifdef JSONCXX_SSE42
 //! Skip whitespace with SSE 4.2 pcmpistrm instruction, testing 16 8-byte characters at once.
 inline const char *SkipWhitespace_SIMD(const char* p) {
-	static const char whitespace[16] = " \n\r\t";
-	__m128i w = _mm_loadu_si128((const __m128i *)&whitespace[0]);
-
-	for (;;) {
-		__m128i s = _mm_loadu_si128((const __m128i *)p);
-		unsigned r = _mm_cvtsi128_si32(_mm_cmpistrm(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
-		if (r == 0)	// all 16 characters are whitespace
-			p += 16;
-		else {		// some of characters may be non-whitespace
+    static const char whitespace[16] = " \n\r\t";
+    __m128i w = _mm_loadu_si128((const __m128i *)&whitespace[0]);
+    
+    for (;;) {
+        __m128i s = _mm_loadu_si128((const __m128i *)p);
+        unsigned r = _mm_cvtsi128_si32(_mm_cmpistrm(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
+        if (r == 0)	// all 16 characters are whitespace
+            p += 16;
+        else {		// some of characters may be non-whitespace
 #ifdef _MSC_VER		// Find the index of first non-whitespace
-			unsigned long offset;
-			if (_BitScanForward(&offset, r))
-				return p + offset;
+            unsigned long offset;
+            if (_BitScanForward(&offset, r))
+                return p + offset;
 #else
-			if (r != 0)
-				return p + __builtin_ffs(r) - 1;
+            if (r != 0)
+                return p + __builtin_ffs(r) - 1;
 #endif
-		}
-	}
+        }
+    }
 }
 
 #elif defined(JSONCXX_SSE2)
 
 //! Skip whitespace with SSE2 instructions, testing 16 8-byte characters at once.
 inline const char *SkipWhitespace_SIMD(const char* p) {
-	static const char whitespaces[4][17] = {
-		"                ",
-		"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
-		"\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r",
-		"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"};
-
-	__m128i w0 = _mm_loadu_si128((const __m128i *)&whitespaces[0][0]);
-	__m128i w1 = _mm_loadu_si128((const __m128i *)&whitespaces[1][0]);
-	__m128i w2 = _mm_loadu_si128((const __m128i *)&whitespaces[2][0]);
-	__m128i w3 = _mm_loadu_si128((const __m128i *)&whitespaces[3][0]);
-
-	for (;;) {
-		__m128i s = _mm_loadu_si128((const __m128i *)p);
-		__m128i x = _mm_cmpeq_epi8(s, w0);
-		x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w1));
-		x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w2));
-		x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w3));
-		unsigned short r = ~_mm_movemask_epi8(x);
-		if (r == 0)	// all 16 characters are whitespace
-			p += 16;
-		else {		// some of characters may be non-whitespace
+    static const char whitespaces[4][17] = {
+        "                ",
+        "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r",
+        "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"};
+    
+    __m128i w0 = _mm_loadu_si128((const __m128i *)&whitespaces[0][0]);
+    __m128i w1 = _mm_loadu_si128((const __m128i *)&whitespaces[1][0]);
+    __m128i w2 = _mm_loadu_si128((const __m128i *)&whitespaces[2][0]);
+    __m128i w3 = _mm_loadu_si128((const __m128i *)&whitespaces[3][0]);
+    
+    for (;;) {
+        __m128i s = _mm_loadu_si128((const __m128i *)p);
+        __m128i x = _mm_cmpeq_epi8(s, w0);
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w1));
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w2));
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w3));
+        unsigned short r = ~_mm_movemask_epi8(x);
+        if (r == 0)	// all 16 characters are whitespace
+            p += 16;
+        else {		// some of characters may be non-whitespace
 #ifdef _MSC_VER		// Find the index of first non-whitespace
-			unsigned long offset;
-			if (_BitScanForward(&offset, r))
-				return p + offset;
+            unsigned long offset;
+            if (_BitScanForward(&offset, r))
+                return p + offset;
 #else
-			if (r != 0)
-				return p + __builtin_ffs(r) - 1;
+            if (r != 0)
+                return p + __builtin_ffs(r) - 1;
 #endif
-		}
-	}
+        }
+    }
 }
 
 #endif // JSONCXX_SSE2
@@ -114,46 +101,46 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
 #ifdef JSONCXX_SIMD
 //! Template function specialization for inplace_stringstream
 template<> inline void SkipWhitespace(insitustringstream& stream) { 
-	stream.src_ = const_cast<char*>(SkipWhitespace_SIMD(stream.src_));
+    stream.src_ = const_cast<char*>(SkipWhitespace_SIMD(stream.src_));
 }
 
 //! Template function specialization for stringstream
 template<> inline void SkipWhitespace(stringstream& stream) {
-	stream.src_ = SkipWhitespace_SIMD(stream.src_);
+    stream.src_ = SkipWhitespace_SIMD(stream.src_);
 }
 #endif // JSONCXX_SIMD
-
-//!	Defines parsing error exception
+    
+//!	defines parsing error exception
 class parsing_error
-	: public std::runtime_error
+    : public std::runtime_error
 {
 public:
-	typedef std::runtime_error _Mybase;
-
-	explicit parsing_error(const std::string& _Message, const std::string& _File, size_t _Line, const std::string& _Func)
-		: _Mybase(_Message)
-	{
-		std::ostringstream oss;
-		oss << "Parsing error at " << _Func << std::endl;
-		oss << _File << "(" << _Line << "): " << _Message;
-		msg_ = oss.str();
-	}
-
-	explicit parsing_error(const char *_Message, const char *_File, size_t _Line, char *_Func)
-		: _Mybase(_Message)
-	{
-		std::ostringstream oss;
-		oss << "Parsing error at " << _Func << std::endl;
-		oss << _File << "(" << _Line << "): " << _Message;
-		msg_ = oss.str();
-	}
-
-	~parsing_error() throw() {}
-
-	const char* what() const throw() { return msg_.c_str(); }
-
+    typedef std::runtime_error _Mybase;
+    
+    explicit parsing_error(const std::string& _Message, const std::string& _File, size_t _Line, const std::string& _Func)
+    : _Mybase(_Message)
+    {
+        std::ostringstream oss;
+        oss << "Parsing error at " << _Func << std::endl;
+        oss << _File << "(" << _Line << "): " << _Message;
+        msg_ = oss.str();
+    }
+    
+    explicit parsing_error(const char *_Message, const char *_File, size_t _Line, char *_Func)
+    : _Mybase(_Message)
+    {
+        std::ostringstream oss;
+        oss << "Parsing error at " << _Func << std::endl;
+        oss << _File << "(" << _Line << "): " << _Message;
+        msg_ = oss.str();
+    }
+    
+    ~parsing_error() throw() {}
+    
+    const char* what() const throw() { return msg_.c_str(); }
+    
 private:
-	std::string msg_;
+    std::string msg_;
 };
 
 #define JSONCXX_PARSING_ERROR(msg) throw parsing_error(msg, __FILE__, __LINE__, __FUNCTION__)
@@ -163,256 +150,216 @@ template <typename Stream, typename Encoding = UTF8<> >
 class Reader
 {
 public:
-	typedef typename Encoding::char_type	char_type;
-	typedef std::basic_string<char_type>	string;
-	typedef std::basic_ifstream<char_type>	ifstream;
-
-	//! ctor
-	Reader() {}
-
-	bool parse(const char* filename, Value<Encoding>& root)
+    typedef typename Encoding::char_type	char_type;
+    typedef std::basic_string<char_type>	string;
+    typedef std::basic_ifstream<char_type>	ifstream;
+    typedef StringStream<Encoding>          stringstream;
+    typedef Value<Encoding>                 value_type;
+    typedef Value<Encoding>                 key_type;
+    
+    bool parse(const string& filename, value_type& root)
 	{
-		ifstream fin(filename);
+        ifstream fin(filename);
+        if (fin.is_open()) {
+            
+            string json;
+            std::getline(fin, json, (char_type)EOF);
+            fin.close(); // preliminary implementation read entire file at once.
+            
+            stringstream s(json.c_str());
+            root = parse(s);
+            
+            return true;
+        }
+        return false;
+    }
+    
+    value_type parse(Stream& s)
+    {
+        switch (s.peek()) {
+            case 'n': return parseNull  (s);
+            case 't': return parseTrue  (s);
+            case 'f': return parseFalse (s);
+            case '"': return parseString(s);
+            case '{': return parseObject(s);
+            case '[': return parseArray (s);
+		}
         
-#ifdef _MSC_VER
-		// for UTF16
-		if (std::is_same<char_type, char16_t>::value)
-			fin.imbue(std::locale(fin.getloc(), 
-				new std::codecvt_utf16<char16_t, 0x10ffff, std::consume_header>));
-#endif
-		if (fin.is_open()) {
-			string json;
-			std::getline(fin, json, (char_type)EOF);
-			StringStream<Encoding> s(json.c_str());
-			return parse(s, root);
-		}
-		return false;
-	}
-	
-	//!	Parse stream and get root object
-	bool parse(Stream& stream, Value<Encoding>& root, ParseFlag flag = ParseDefault)
-	{
-		// comment string "//"
-		// /* */
-		SkipWhitespace(stream);
-
-		try {
-			if (stream.peek() == '\0')
-				JSONCXX_PARSING_ERROR("Text only contains white space(s).");
-			else {
-				switch (stream.peek()) {
-				case '{':
-					root = parseObject(stream, flag); 
-					break;
-				case '[':
-					root = parseArray (stream, flag); 
-					break;
-				default:
-					JSONCXX_PARSING_ERROR("Except either an object or array at root.");
-				}
-
-				SkipWhitespace(stream);
-
-				if (stream.peek() != '\0')
-					JSONCXX_PARSING_ERROR("Nothig should follow the root object or array.");
-			}
-		} catch (std::runtime_error& e) {
-			std::cerr << e.what() << std::endl;
-			return false;
-		}
-
-		return true;
-	}
-
+		return parseNumber(s);
+    }
+    
 private:
-	//!	@brief	Parse object from stream
+    //! @brief  Internal handlers for each of the value types.
+    //! @{
+    
+    //!	@brief	Parse object from stream
 	//!			object:{name:value, ...}
-	Value<Encoding> parseObject(Stream& stream, ParseFlag flag)
+	value_type parseObject(Stream& s)
 	{
-		Value<Encoding> ret(ObjectType);
-
-		assert(stream.peek() == '{');
-		stream.take(); // skip '{'
-		SkipWhitespace(stream);
-
-		if (stream.peek() == '}') {
-			stream.take();
+        assert(s.peek() == '{');
+        
+		value_type ret(ObjectType);
+        s.take(); // skip '{'
+		SkipWhitespace(s);
+        
+		if (s.peek() == '}') { // empty object
+			s.take();
 			return ret;
 		}
-
-		while(true) {
-			if (stream.peek() != '"')
+        
+        while(true) {
+			if (s.peek() != '"')
 				JSONCXX_PARSING_ERROR("Name of an object member must be a string"); // stream.tell();
-
-			Value<Encoding> key = parseString(stream, flag);
-			SkipWhitespace(stream);
-
-			if (stream.take() != ':')
+            
+            key_type key = parseString(s);
+            
+			SkipWhitespace(s);
+            
+			if (s.take() != ':')
 				JSONCXX_PARSING_ERROR("There must be a colon after the name of object member"); // stream.tell();
-
-			SkipWhitespace(stream);
-
-			ret.insert(std::move(key), parseValue(stream, flag));
-
-			SkipWhitespace(stream);
-
-			switch (stream.take()) {
-			case ',': SkipWhitespace(stream); break;
-			case '}': return ret;
-			default: JSONCXX_PARSING_ERROR("Must be a comma or '}' after an object member"); // stream.tell();
+            
+			SkipWhitespace(s);
+            
+			ret.insert(std::move(key), parse(s));
+            
+			SkipWhitespace(s);
+            
+			switch (s.take()) {
+                case ',': SkipWhitespace(s); break;
+                case '}': return ret;
+                default: JSONCXX_PARSING_ERROR("Must be a comma or '}' after an object member"); // stream.tell();
 			}
 		}
-
-		return ret;
-	}
-
-	//!	@brief	Parse array from stream
+        
+        return ret;
+    }
+    
+    //!	@brief	Parse array from stream
 	//!			array: [ value, ... ]
-	Value<Encoding> parseArray(Stream& stream, ParseFlag flag)
-	{
-		Value<Encoding> ret(ArrayType);
-
-		assert(stream.peek() == '[');
-		stream.take(); // skip '['
-		SkipWhitespace(stream);
-
-		if (stream.peek() == ']') {
-			stream.take();
+	value_type parseArray(Stream& s)
+    {
+        assert(s.peek() == '[');
+		s.take(); // skip '['
+		SkipWhitespace(s);
+        
+        value_type ret(ArrayType);
+        
+		if (s.peek() == ']') {
+			s.take();
 			return ret;
 		}
-
+        
 		while (true) {
-			ret.append(parseValue(stream, flag));
-			SkipWhitespace(stream);
-
-			switch (stream.take()) {
-			case ',': SkipWhitespace(stream); break;
-			case ']': return ret;
-			default: JSONCXX_PARSING_ERROR("Must be a comma or ']' after an array member"); // stream.tell();
+			ret.append(parse(s));
+            
+			SkipWhitespace(s);
+            
+			switch (s.take()) {
+                case ',': SkipWhitespace(s); break;
+                case ']': return ret;
+                default: JSONCXX_PARSING_ERROR("Must be a comma or ']' after an array member"); // stream.tell();
 			}
 		}
-
+        
 		return ret;
-	}
-
-	//!	@brief	Parse null value from stream
-	Value<Encoding> parseNull(Stream& stream, ParseFlag flag)
+    }
+    
+    //!	Parse null value from stream
+	value_type parseNull(Stream& s)
+    {
+        JSONCXX_ASSERT(s.peek() == 'n');
+        s.take();
+        
+        if (s.take() == 'u' &&
+			s.take() == 'l' &&
+			s.take() == 'l')
+			return value_type(); // null
+		else
+			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
+    }
+    
+    //!	Parse true value from stream
+	value_type parseTrue(Stream& s)
 	{
-		assert(stream.peek() == 'n');
-		stream.take();
-
-		if (stream.take() == 'u' && 
-			stream.take() == 'l' &&
-			stream.take() == 'l')
-			return Value<Encoding>(); // null
+		JSONCXX_ASSERT(s.peek() == 't');
+		s.take();
+        
+		if (s.take() == 'r' &&
+			s.take() == 'u' &&
+			s.take() == 'e')
+			return value_type(TrueType); // true
 		else
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
-
-	//!	@brief	Parse true value from stream
-	Value<Encoding> parseTrue(Stream& stream, ParseFlag flag)
+    
+	//! Parse false value from stream
+	value_type parseFalse(Stream& s)
 	{
-		assert(stream.peek() == 't');
-		stream.take();
-
-		if (stream.take() == 'r' && 
-			stream.take() == 'u' &&
-			stream.take() == 'e')
-			return Value<Encoding>(TrueType); // true
+		JSONCXX_ASSERT(s.peek() == 'f');
+		s.take();
+        
+		if (s.take() == 'a' &&
+			s.take() == 'l' &&
+			s.take() == 's' &&
+			s.take() == 'e')
+			return value_type(FalseType); // false
 		else
 			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
 	}
-
-	//!	@brief	Parse false value from stream
-	Value<Encoding> parseFalse(Stream& stream, ParseFlag flag)
+    
+    //! Parse number value from stream
+	value_type parseNumber(Stream& s)
 	{
-		assert(stream.peek() == 'f');
-		stream.take();
-
-		if (stream.take() == 'a' && 
-			stream.take() == 'l' &&
-			stream.take() == 's' &&
-			stream.take() == 'e')
-			return Value<Encoding>(FalseType); // false
-		else
-			JSONCXX_PARSING_ERROR("Invalid value"); // stream.tell() - 1;
-	}
-
-	//!	@brief	Parse number value from stream
-	Value<Encoding> parseNumber(Stream& stream, ParseFlag flag)
-	{
-		Stream s = stream; // Local copy for optimization
+		Stream s_ = s; // Local copy for optimization
 		
 		// parse number
-		while ((s.peek() >= '0' && s.peek() <= '9') ||
-				s.peek() == '.' ||
-				s.peek() == 'e' || s.peek() == 'E' ||
-				s.peek() == '-' || s.peek() == '+') s.take();
-
-		Value<Encoding> ret;
-
-		std::string number(stream.src_, s.src_);
-
+		while ((s_.peek() >= '0' && s_.peek() <= '9') ||
+               s_.peek() == '.' ||
+               s_.peek() == 'e' || s_.peek() == 'E' ||
+               s_.peek() == '-' || s_.peek() == '+') s.take();
+        
+		value_type ret;
+        
+		std::string number(s.src_, s_.src_);
+        
 		if (number.find_first_of('.') == std::string::npos)
-			ret = std::move(Value<Encoding>((natural)std::stoll(number)));
+			ret = std::move(value_type((natural)std::stoll(number)));
 		else
-			ret = std::move(Value<Encoding>((real)std::stod(number)));
-
-		stream = s;
-
+			ret = std::move(value_type((real)std::stod(number)));
+        
+		s = s_;
+        
 		return ret;
 	}
-
+    
 	//!	@brief	Parse string value from stream
-	//!	@note	Current version do not support "u" literal, 4 hexadecimal digits
-	Value<Encoding> parseString(Stream& stream, ParseFlag flag)
+	//!	@note	This implementation do not support "u" literal, 4 hexadecimal digits
+	value_type parseString(Stream& s)
 	{
-		Value<Encoding> ret;
-		Stream s = stream;
-		assert(s.peek() == '\"');
-		s.take(); // skip '\"'
-
-		char_type* head;
-		size_type length;
-
-		if (flag & ParseInplace)
-			head = s.begin();
-		else
-			length = 0;
-
+        JSONCXX_ASSERT(s.peek() == '\"');
+        s.take(); // skip '\"'
+        
+		Stream s_ = s;
+		
+        value_type ret;
+        
 		while (true) {
-			switch (s.peek()) {
-			case '\"':
-				ret = Value<Encoding>(stream.src_ + 1, s.src_); // without '\"'
-				s.take();
-				stream = s;
-				return ret;
-			case '\0': JSONCXX_PARSING_ERROR("Lacks ending quation before the the end of string");
-			case '\\': JSONCXX_PARSING_ERROR("Currently not supported!");
-			default: s.take(); // normal character
+			switch (s_.peek()) {
+                case '\"':
+                    ret = value_type(s.src_, s_.src_);
+                    s_.take();
+                    s = s_;
+                    return ret;
+                case '\0': JSONCXX_PARSING_ERROR("Lacks ending quation before the the end of string");
+                case '\\': JSONCXX_PARSING_ERROR("Currently not supported!");
+                default: s_.take(); // normal character
 			}
 		}
-
+        
 		return ret; // unreachable
 	}
-
-	//! Parse any JSON value
-	Value<Encoding> parseValue(Stream& stream, ParseFlag flag)
-	{
-		switch (stream.peek()) {
-		case 'n': return parseNull  (stream, flag);
-		case 't': return parseTrue  (stream, flag);
-		case 'f': return parseFalse (stream, flag);
-		case '"': return parseString(stream, flag);
-		case '{': return parseObject(stream, flag);
-		case '[': return parseArray (stream, flag);
-		}
-
-		return parseNumber(stream, flag);
-	}
+    
+    //! @}
 };
-
-//! Define reader for UTF8 encoding.
-typedef Reader<StringStream<UTF8<> >, UTF8<> > reader;
 
 }
