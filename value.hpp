@@ -143,7 +143,7 @@ protected:
 			}
             
 			// R-value reference
-			auto bi = members_->emplace(std::move(_key), std::move(value_type()));
+			auto bi = members_->emplace(std::make_pair(std::move(_key), std::move(value_type())));
 			assert(bi.second); // is it possible?
             
 			return ((*(bi.first)).second);
