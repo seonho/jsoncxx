@@ -529,17 +529,19 @@ public:
                 
 				const Object& o = value.asObject();
                 
-                // lambda function variable
-				auto func = [&](const typename Object::storage_type::value_type& p) -> string {
-					std::basic_ostringstream<char_type> oss;
-					oss << p.first << " : " << p.second;
-					return oss.str();
-				};
-				
-                std::transform(o.begin(), std::next(o.begin(), value.size() - 1),
-                               std::ostream_iterator<string, char_type>(os, ", "),
-                               func);
-                os << func(*std::next(o.begin(), value.size() - 1));
+                if (!o.empty()) {
+                    // lambda function variable
+                    auto func = [&](const typename Object::storage_type::value_type& p) -> string {
+                        std::basic_ostringstream<char_type> oss;
+                        oss << p.first << " : " << p.second;
+                        return oss.str();
+                    };
+                    
+                    std::transform(o.begin(), std::next(o.begin(), value.size() - 1),
+                                   std::ostream_iterator<string, char_type>(os, ", "),
+                                   func);
+                    os << func(*std::next(o.begin(), value.size() - 1));
+                }
                 
 				os << '}'; // Object end
 			}
@@ -549,8 +551,11 @@ public:
 				os << '['; // Array begin
 				
 				const Array& a = value.asArray();
-				std::copy(a.begin(), std::next(a.begin(), value.size() - 1), std::ostream_iterator<const Value<Encoding>&>(os, ", "));
-				os << a.back();
+                
+                if (!a.empty()) {
+                    std::copy(a.begin(), std::next(a.begin(), value.size() - 1), std::ostream_iterator<const Value<Encoding>&>(os, ", "));
+                    os << a.back();
+                }
                 
 				os << ']'; // Array end
 			}
