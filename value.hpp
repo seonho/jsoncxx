@@ -149,6 +149,18 @@ protected:
 			return ((*(bi.first)).second);
         }
         
+        const value_type& operator[] (const string& key) const
+        {
+            key_type _key = make_key(key);
+			auto itr = members_->find(_key);
+			if (itr != members_->end()) {
+				_key.clear();
+				return itr->second;
+			}
+            
+			return value_type::null();
+        }
+        
         static key_type make_key(const string& key)
         {
             key_type _key(key);
