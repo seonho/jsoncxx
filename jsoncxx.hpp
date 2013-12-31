@@ -11,33 +11,13 @@
 #include <cassert>
 #define JSONCXX_ASSERT(x) assert(x)
 
-#include "encoding.hpp"
+#include "jsoncxx.hpp"
 #include "stream.hpp"
+#include "reader.hpp"
+#include "writer.hpp"
 
-///////////////////////////////////////////////////////////////////////////////
-// Type
-namespace jsoncxx
-{
-	//! Type of JSON value
-	enum ValueType {
-		NullType,	//!< null
-		FalseType,	//!< false
-		TrueType,	//!< true
-		ObjectType,	//!< object
-		ArrayType,	//!< array
-		StringType,	//!< string
-		NumberType,	//!< number
-	};
-
-	//! Type define of internal number types
-	typedef __int64		natural;
-	typedef double		real;
-
-	//! Type of number
-	enum NumericType : unsigned int {
-		NaturalNumber,
-		RealNumber,
-	};
-
-	typedef unsigned int			size_type;
+namespace jsoncxx {
+    typedef Value<UTF8<> >                          value;
+    typedef Reader<StringStream<UTF8<> >, UTF8<> >  reader;
+    typedef Writer<StringStream<UTF8<> >, UTF8<> >  writer;
 }

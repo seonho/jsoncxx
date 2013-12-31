@@ -8,7 +8,10 @@
 
 #pragma once
 
-#include "jsoncxx.hpp"
+#include "encoding.hpp"
+#include "value.hpp"
+
+#include <fstream>      // basic_ofstream
 
 namespace jsoncxx
 {
@@ -18,12 +21,14 @@ template <typename Stream, typename Encoding = UTF8<> >
 class Writer
 {
 public:
-	typedef typename Encoding::char_type char_type;
+	typedef typename Encoding::char_type        char_type;
+    typedef std::basic_string<char_type>		string;
+    typedef std::basic_ofstream<char_type>      ofstream;
+    
 	typedef typename Value<Encoding>::Number	Number;
 	typedef typename Value<Encoding>::String	String;
 	typedef typename Value<Encoding>::Array		Array;
 	typedef typename Value<Encoding>::Object	Object;
-	typedef std::basic_string<char_type>		string;
 
 	Writer(Stream& stream, size_type nestingLevel = 0)
 		: stream_(stream), nestingLevel_(nestingLevel) {}
@@ -133,8 +138,5 @@ private:
 	Stream&		stream_;		///< stream object
 	size_type	nestingLevel_;	///< nesting level
 };
-
-//!	Define writer for UTF8 StringStream
-typedef Writer<stringstream> writer;
 
 }
