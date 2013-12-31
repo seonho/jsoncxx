@@ -176,6 +176,8 @@ public:
     
     value_type parse(Stream& s)
     {
+        SkipWhitespace(s);
+        
         switch (s.peek()) {
             case 'n': return parseNull  (s);
             case 't': return parseTrue  (s);
@@ -316,7 +318,8 @@ private:
 		while ((s_.peek() >= '0' && s_.peek() <= '9') ||
                s_.peek() == '.' ||
                s_.peek() == 'e' || s_.peek() == 'E' ||
-               s_.peek() == '-' || s_.peek() == '+') s.take();
+               s_.peek() == '-' || s_.peek() == '+')
+            s_.take();
         
 		value_type ret;
         
