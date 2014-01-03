@@ -18,14 +18,14 @@ namespace jsoncxx {
 //	Original code by
 //		Copyright (c) 2011-2012 Milo Yip (miloyip@gmail.com)
 //
-/*! \class jsoncxx::stream
-    \brief Concept for reading and writing characters.
+/*! @class jsoncxx::Stream
+    @brief Concept for reading and writing characters.
 
     For read-only stream, no need to implement begin(), put() and end().
 
     For write-only stream, only need to implement put().
  
-    \code
+    @code
     concept Stream {
         typename char_type;	//!< Character type of the stream.
 
@@ -36,19 +36,19 @@ namespace jsoncxx {
         char_type take();
 
         //! Get the current read cursor.
-        //! \return Number of characters read from start.
+        //! @return Number of characters read from start.
         size_t tell();
 
         //! Begin writing operation at the current read pointer.
-        //! \return The begin Writer pointer.
+        //! @return The begin Writer pointer.
         char_type* begin();
 
         //! Write a character.
         void Put(char_type c);
 
         //! End the writing operation.
-        //! \param begin The begin write pointer returned by PutBegin().
-        //! \return Number of characters written.
+        //! @param begin The begin write pointer returned by PutBegin().
+        //! @return Number of characters written.
         size_t end(char_type* begin);
     }
     \endcode

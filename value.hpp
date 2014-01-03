@@ -18,7 +18,7 @@
 
 namespace jsoncxx {
     
-//! Type of JSON value
+//! Types of JSON value
 enum ValueType {
     NullType,	//!< null
     FalseType,	//!< false
@@ -39,7 +39,7 @@ typedef double          real;
 
 typedef unsigned int	size_type;
     
-//! Type of number
+//! Types of number
 enum NumericType : unsigned int {
     NaturalNumber,
     RealNumber,
@@ -66,6 +66,7 @@ protected:
     //!	Represents a number type value.
 	struct Number
 	{
+		//! Internal union structure for number types
 		union NumberHolder
 		{
 			natural	n;
@@ -180,7 +181,7 @@ protected:
         storage_type*    members_;
     };
     
-    //!	internal type union structure
+    //!	Internal union structure for value types
 	union ValueHolder
 	{
 		String	s;
@@ -190,6 +191,7 @@ protected:
 	};
     
 public:
+	//! null object.
     static Value& null()
 	{
 		static Value<Encoding> nullobj;
@@ -205,7 +207,7 @@ public:
 		clear();
 	}
     
-    //! copy ctor
+    //! copy ctor.
 	Value(const Value& other)
     : type_(other.type_)
 	{
@@ -232,7 +234,7 @@ public:
 		}
 	}
     
-    //! copy assignment operator
+    //! copy assignment operator.
 	Value& operator= (const Value& other)
 	{
         if (this != &other) {
@@ -281,7 +283,7 @@ public:
 		}
 	}
     
-    //! ctor for numeric types
+    //! ctor for numeric types.
 	template <typename T>
 	Value(T value, typename std::enable_if<std::is_arithmetic<T>::value, T>::type *p = nullptr)
         : type_(NumberType)
@@ -323,7 +325,7 @@ public:
         value_.s.hash_ = std::hash<string>()(*value_.s.str_);
 	}
 	
-	//! ctor for string type
+	//! ctor for string type.
 	Value(const char_type* begin, const char_type* end)
         : type_(StringType)
 	{
@@ -331,7 +333,7 @@ public:
         value_.s.hash_ = std::hash<string>()(*value_.s.str_);
 	}
     
-    //! STL-like functions
+    //! @name	STL style functions.
     //! @{
     
     void clear()
@@ -386,7 +388,7 @@ public:
     
     //! @}
     
-    //! Property functions
+    //! @name	Property functions.
     //! @{
     
     //! get type of value
@@ -447,7 +449,7 @@ public:
     
     //! @}
     
-    //! Array functions
+    //! @name	Array functions.
     //! @{
     
     //! Append a value if current value type is array.
@@ -490,7 +492,7 @@ public:
     
     //! @}
     
-    //! Object functions
+    //! @name	Object functions.
     //! @{
     
     //!	Access object element by key.
@@ -605,22 +607,26 @@ private:
 
 }
 
+#ifndef DOXYGEN
+
 namespace std {
 
-//! template specialization of std::hash for Value type
-template <typename Encoding>
-struct hash<jsoncxx::Value<Encoding> >
-    : public unary_function<jsoncxx::Value<Encoding>, size_t>
-{
-	typedef std::basic_string<typename Encoding::char_type> string;
-    
-	size_t operator()(const jsoncxx::Value<Encoding>& _KeyVal) const
+	//! template specialization of std::hash for Value type
+	template <typename Encoding>
+	struct hash<jsoncxx::Value<Encoding> >
+		: public unary_function<jsoncxx::Value<Encoding>, size_t>
 	{
-		if(_KeyVal.type() != jsoncxx::StringType)
-			throw std::runtime_error("Non-String type Value cannot have hash value!");
-        
-		return hash<string>()(_KeyVal.asString());
-	}
-};
-    
+		typedef std::basic_string<typename Encoding::char_type> string;
+
+		size_t operator()(const jsoncxx::Value<Encoding>& _KeyVal) const
+		{
+			if(_KeyVal.type() != jsoncxx::StringType)
+				throw std::runtime_error("Non-String type Value cannot have hash value!");
+
+			return hash<string>()(_KeyVal.asString());
+		}
+	};
+
 }
+
+#endif

@@ -16,6 +16,7 @@
 #include "reader.hpp"
 #include "writer.hpp"
 
+//!	A template-based JSON parser and generator with simple and intuitive interface.
 namespace jsoncxx {
     typedef Value<UTF8<> >                          value;
     typedef Reader<StringStream<UTF8<> >, UTF8<> >  reader;
