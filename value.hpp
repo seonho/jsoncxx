@@ -19,7 +19,8 @@
 namespace jsoncxx {
     
 //! Types of JSON value
-enum ValueType {
+enum ValueType
+{
     NullType,	//!< null
     FalseType,	//!< false
     TrueType,	//!< true
@@ -40,7 +41,8 @@ typedef double          real;
 typedef unsigned int	size_type;
     
 //! Types of number
-enum NumericType : unsigned int {
+enum NumericType : unsigned int
+{
     NaturalNumber,
     RealNumber,
 };
@@ -609,7 +611,8 @@ private:
 
 #ifndef DOXYGEN
 
-namespace std {
+namespace std
+{
 
 	//! template specialization of std::hash for Value type
 	template <typename Encoding>

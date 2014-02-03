@@ -16,7 +16,8 @@
 #include <string>       // basic_stream
 #include <fstream>      // basic_ifstream
 
-namespace jsoncxx {
+namespace jsoncxx
+{
     
 ///////////////////////////////////////////////////////////////////////////////
 // SkipWhitespace
@@ -28,7 +29,8 @@ namespace jsoncxx {
  \note This function has SSE2/SSE4.2 specialization.
  */
 template<typename Stream>
-void SkipWhitespace(Stream& stream) {
+void SkipWhitespace(Stream& stream)
+{
     Stream s = stream;	// Use a local copy for optimization
     while (s.peek() == ' ' || s.peek() == '\n' || s.peek() == '\r' || s.peek() == '\t')
         s.take();
@@ -37,7 +39,8 @@ void SkipWhitespace(Stream& stream) {
 
 #ifdef JSONCXX_SSE42
 //! Skip whitespace with SSE 4.2 pcmpistrm instruction, testing 16 8-byte characters at once.
-inline const char *SkipWhitespace_SIMD(const char* p) {
+inline const char *SkipWhitespace_SIMD(const char* p)
+{
     static const char whitespace[16] = " \n\r\t";
     __m128i w = _mm_loadu_si128((const __m128i *)&whitespace[0]);
     
@@ -62,7 +65,8 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
 #elif defined(JSONCXX_SSE2)
 
 //! Skip whitespace with SSE2 instructions, testing 16 8-byte characters at once.
-inline const char *SkipWhitespace_SIMD(const char* p) {
+inline const char *SkipWhitespace_SIMD(const char* p)
+{
     static const char whitespaces[4][17] = {
         "                ",
         "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
@@ -100,12 +104,14 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
 
 #ifdef JSONCXX_SIMD
 //! Template function specialization for inplace_stringstream
-template<> inline void SkipWhitespace(insitustringstream& stream) { 
+template<> inline void SkipWhitespace(insitustringstream& stream)
+{
     stream.src_ = const_cast<char*>(SkipWhitespace_SIMD(stream.src_));
 }
 
 //! Template function specialization for stringstream
-template<> inline void SkipWhitespace(stringstream& stream) {
+template<> inline void SkipWhitespace(stringstream& stream)
+{
     stream.src_ = SkipWhitespace_SIMD(stream.src_);
 }
 #endif // JSONCXX_SIMD

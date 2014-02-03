@@ -10,7 +10,8 @@
 
 #include "encoding.hpp"
 
-namespace jsoncxx {
+namespace jsoncxx
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Stream
@@ -56,7 +57,8 @@ namespace jsoncxx {
 
 //! Put N copies of a character to a stream.
 template<typename Stream, typename CharType>
-inline void putN(Stream& stream, CharType c, size_t n) {
+inline void putN(Stream& stream, CharType c, size_t n)
+{
     for (size_t i = 0; i < n; i++)
         stream.put(c);
 }
@@ -69,7 +71,8 @@ inline void putN(Stream& stream, CharType c, size_t n) {
 //
 //! Read-only string stream.
 template <typename Encoding>
-struct StringStream {
+struct StringStream
+{
     typedef typename Encoding::char_type char_type;
     
     StringStream(const char_type *src) : src_(src), head_(src) {}
