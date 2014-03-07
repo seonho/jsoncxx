@@ -11,7 +11,7 @@
 #include <cassert>
 #define JSONCXX_ASSERT(x) assert(x)
 
-#include "jsoncxx.hpp"
+#include "value.hpp"
 #include "stream.hpp"
 #include "reader.hpp"
 #include "writer.hpp"
