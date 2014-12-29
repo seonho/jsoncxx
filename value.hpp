@@ -584,8 +584,10 @@ public:
             case NumberType:
                 if (value.asNumber().type_ == NaturalNumber)
                     os << value.asNatural();
-                else
+				else {
+					os.precision(std::numeric_limits<real>::digits10);
                     os << value.asReal();
+				}
                 break;
 		}
         
