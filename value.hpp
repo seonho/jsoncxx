@@ -250,10 +250,10 @@ public:
 	Value(Value&& other)
     : type_(NullType)
 	{
-		*this = std::move(other); // delegate to move assignemnt
+		*this = std::move(other); // delegate to move assignment
 	}
     
-    //! move assignemnt operator
+    //! move assignment operator
     Value& operator= (Value&& other)
     {
         if (this != &other) {
@@ -386,6 +386,23 @@ public:
 		}
         
 		return size_;
+	}
+
+	//! return object or array is empty or not
+	inline bool empty() const
+	{
+		JSONCXX_ASSERT(type_ == NullType || type_ == ArrayType || type_ == ObjectType);
+
+		switch (type_) {
+		case ArrayType:
+			return value_.a.empty();
+		case ObjectType:
+			return value_.o.empty();
+		default:
+			return true;
+		}
+
+		return true;
 	}
     
     //! @}
