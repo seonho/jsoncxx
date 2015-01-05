@@ -10,7 +10,8 @@
 
 #include <string>   // basic_string
 #include <ostream>  // basic_ostream
-#include <list>
+//#include <list>
+#include <vector>
 #include <map>
 #include <cstring>  // memset
 #include <algorithm> // transform
@@ -89,29 +90,39 @@ protected:
 	struct Array
 	{
         typedef Value<Encoding>                         elem_type;
-        typedef std::list<elem_type>                    storage_type;
+        //typedef std::list<elem_type>                    storage_type;
+		typedef std::vector<elem_type>                  storage_type;
         typedef typename storage_type::iterator         iterator;
         typedef typename storage_type::const_iterator   const_iterator;
         
-        elem_type& operator[] (size_t index)
-        {
-            if (index < size())
-                return *std::next(elements_->begin(), index);
-            else
-                throw std::runtime_error("Out of range");
-            
-            return Value<Encoding>::null(); // unreachable
-        }
-        
-        const elem_type& operator[] (size_t index) const
-        {
-            if (index < size())
-                return *std::next(elements_->begin(), index);
-            else
-                throw std::runtime_error("Out of range");
-            
-            return Value<Encoding>::null(); // unreachable
-        }
+        //elem_type& operator[] (size_t index)
+        //{
+        //    if (index < size())
+        //        return *std::next(elements_->begin(), index);
+        //    else
+        //        throw std::runtime_error("Out of range");
+        //    
+        //    return Value<Encoding>::null(); // unreachable
+        //}
+        //
+        //const elem_type& operator[] (size_t index) const
+        //{
+        //    if (index < size())
+        //        return *std::next(elements_->begin(), index);
+        //    else
+        //        throw std::runtime_error("Out of range");
+        //    
+        //    return Value<Encoding>::null(); // unreachable
+        //}
+		inline elem_type& operator[] (size_t index)
+		{
+			return (*elements_)[index];
+		}
+
+		inline const elem_type& operator[] (size_t index) const
+		{
+			return (*elements_)[index];
+		}
         
         inline void clear()                 { elements_->clear(); }
         inline size_type size() const       { return (size_type)elements_->size(); }
@@ -334,6 +345,15 @@ public:
 		value_.s.str_ = new string(begin, end);
         value_.s.hash_ = std::hash<string>()(*value_.s.str_);
 	}
+
+#if __cplusplus > 199711L || _MSC_VER >= 1800
+	//! ctor for array type.
+	Value(std::initializer_list<self_type> l)
+		: type_(ArrayType)
+	{
+		value_.a.elements_ = new typename Array::storage_type(l.begin(), l.end());
+	}
+#endif
     
     //! @name	STL style functions.
     //! @{
@@ -494,6 +514,18 @@ public:
 		value_.a.elements_->push_back(value); // copy...
 		return value_.a.elements_->back();
 	}
+
+#if __cplusplus > 199711L || _MSC_VER >= 1800
+	//! Append list of values if current value type is array.
+	inline void append(std::initializer_list<self_type> l)
+	{
+		JSONCXX_ASSERT(type_ == NullType || type_ == ArrayType);
+
+		if (type_ == NullType)
+			*this = std::move(self_type(ArrayType));
+		value_.a.elements_->insert(value_.a.elements_->end(), l.begin(), l.end()); // copy...
+	}
+#endif
     
     //! Access array element by index.
 	inline self_type& operator [] (const size_type index)
@@ -618,6 +650,46 @@ public:
             return *value_.s.str_ < *other.value_.s.str_;
         return value_.s.hash_ < other.value_.s.hash_;
     }
+
+	//!	@name Cast operator
+	//!	@{
+#if __cplusplus > 199711L || _MSC_VER >= 1800
+	inline explicit operator bool() const
+	{
+		return asBool();
+	}
+#endif
+
+	inline operator string&() const
+	{
+		return asString();
+	}
+
+	inline operator natural() const
+	{
+		return asNatural();
+	}
+
+	inline operator real() const
+	{
+		return asReal();
+	}
+
+	inline operator Number&() const
+	{
+		return asNumber();
+	}
+
+	inline operator Array&() const
+	{
+		return asArray();
+	}
+
+	inline operator Object&() const
+	{
+		return asObject();
+	}
+	//!	@}
     
 private:
 	ValueHolder     value_;

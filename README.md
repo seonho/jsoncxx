@@ -64,6 +64,8 @@ int main()
     std::ofstream fout("save.json");
     fout << glossary;
     fout.close();
+
+    return 0;
 }
 ```
 
