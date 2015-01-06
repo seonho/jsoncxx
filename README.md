@@ -80,3 +80,4 @@ int main()
 }
 ```
 
+Detailed documentation could be found [here](http://seonho.github.io/jsoncxx/).
