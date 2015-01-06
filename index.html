@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Jsoncxx : jsoncxx is an attempt to create template JSON parser and generator with very simple API.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Jsoncxx</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/seonho/jsoncxx">View on GitHub</a>
+
+          <h1 id="project_title">Jsoncxx</h1>
+          <h2 id="project_tagline">jsoncxx is an attempt to create template JSON parser and generator with very simple API.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/seonho/jsoncxx/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/seonho/jsoncxx/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="jsoncxx" class="anchor" href="#jsoncxx" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSONCXX</h1>
+
+<h3>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h3>
+
+<p><code>JSONCXX</code> is an attempt to create template JSON parser and generator with very simple API via combining advantages of two famous libraries, <a href="https://github.com/miloyip/rapidjson">RapidJSON</a> and <a href="https://github.com/open-source-parsers/jsoncpp">JSONCPP</a>.</p>
+
+<h3>
+<a id="a-note" class="anchor" href="#a-note" aria-hidden="true"><span class="octicon octicon-link"></span></a>A note</h3>
+
+<p>Current version do not fully support JSON specifications.</p>
+
+<h3>
+<a id="usage-at-a-glance" class="anchor" href="#usage-at-a-glance" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage at a glance</h3>
+
+<p>The <code>JSONCXX</code> should be added to your compile include path.</p>
+
+<div class="highlight highlight-cpp"><pre>#<span class="pl-k">include</span> <span class="pl-s1"><span class="pl-pds">"</span>jsoncxx.hpp<span class="pl-pds">"</span></span>
+
+<span class="pl-st">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-c">// The contents of glossary.json file can be found fron http://json.org/example</span>
+    <span class="pl-c">// parse a JSON file</span>
+    jsoncxx::reader reader;
+    jsoncxx::value json;
+
+    <span class="pl-k">if</span> (!reader.<span class="pl-s3">parse</span>(<span class="pl-s1"><span class="pl-pds">"</span>glossary.json<span class="pl-pds">"</span></span>, json)) {
+        std::cerr &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span>Failed to open or parse glossary.json<span class="pl-pds">"</span></span> &lt;&lt; std::endl;
+        <span class="pl-s3">exit</span>(-<span class="pl-c1">1</span>);
+    }
+
+    jsoncxx::value glossary = json[<span class="pl-s1"><span class="pl-pds">"</span>glossary<span class="pl-pds">"</span></span>];
+
+    <span class="pl-c">// object iterator</span>
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span><span class="pl-cce">\"</span>glossary<span class="pl-cce">\"</span> contains ...<span class="pl-pds">"</span></span> &lt;&lt; std::endl;
+    <span class="pl-s3">std::for_each</span>(glossary.<span class="pl-s3">asObject</span>().<span class="pl-s3">begin</span>(), glossary.<span class="pl-s3">asObject</span>().<span class="pl-s3">end</span>(), [&amp;](<span class="pl-s">const</span> std::pair&lt;jsoncxx::value, jsoncxx::value&gt;&amp; elem) {
+        std::cout &lt;&lt; elem.<span class="pl-vo">first</span> &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span> : <span class="pl-pds">"</span></span> &lt;&lt; elem.<span class="pl-vo">second</span> &lt;&lt; std::endl;
+    });
+
+    <span class="pl-c">// object access by name, and string access</span>
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span><span class="pl-cce">\"</span>title<span class="pl-cce">\"</span> is <span class="pl-pds">"</span></span> &lt;&lt; glossary[<span class="pl-s1"><span class="pl-pds">"</span>title<span class="pl-pds">"</span></span>].<span class="pl-s3">asString</span>() &lt;&lt; std::endl;
+
+    <span class="pl-c">// array access </span>
+    jsoncxx::value seealso = glossary[<span class="pl-s1"><span class="pl-pds">"</span>GlossDiv<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>GlossList<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>GlossEntry<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>GlossDef<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>GlossSeeAlso<span class="pl-pds">"</span></span>];
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span>0th element of <span class="pl-cce">\"</span>GlossSeeAlso<span class="pl-cce">\"</span> is <span class="pl-pds">"</span></span> &lt;&lt; seealso[<span class="pl-c1">0</span>] &lt;&lt; std::endl;
+
+    <span class="pl-c">// array iterator</span>
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span><span class="pl-cce">\"</span>GlossSeeAlso<span class="pl-cce">\"</span> contains ...<span class="pl-pds">"</span></span> &lt;&lt; std::endl;
+    <span class="pl-s3">std::for_each</span>(seealso.<span class="pl-s3">asArray</span>().<span class="pl-s3">begin</span>(), seealso.<span class="pl-s3">asArray</span>().<span class="pl-s3">end</span>(), [&amp;](<span class="pl-s">const</span> jsoncxx::value&amp; elem) { std::cout &lt;&lt; elem &lt;&lt; std::endl; });
+
+    <span class="pl-c">// natural or real number type</span>
+    glossary[<span class="pl-s1"><span class="pl-pds">"</span>number<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>natural<span class="pl-pds">"</span></span>] = <span class="pl-c1">1234</span>;
+    glossary[<span class="pl-s1"><span class="pl-pds">"</span>number<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>real<span class="pl-pds">"</span></span>] = <span class="pl-c1">3.14159265359</span>;
+
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span>number types :<span class="pl-pds">"</span></span> &lt;&lt; glossary[<span class="pl-s1"><span class="pl-pds">"</span>number<span class="pl-pds">"</span></span>] &lt;&lt; std::endl;
+
+    <span class="pl-c">// boolean type</span>
+    glossary[<span class="pl-s1"><span class="pl-pds">"</span>boolean<span class="pl-pds">"</span></span>] = <span class="pl-c1">true</span>;
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span>boolean type : <span class="pl-pds">"</span></span> &lt;&lt; glossary[<span class="pl-s1"><span class="pl-pds">"</span>boolean<span class="pl-pds">"</span></span>] &lt;&lt; std::endl;
+
+    <span class="pl-c">// null type</span>
+    glossary[<span class="pl-s1"><span class="pl-pds">"</span>nothing<span class="pl-pds">"</span></span>];
+    std::cout &lt;&lt; <span class="pl-s1"><span class="pl-pds">"</span>If nothing specified, then type would be null type and value is <span class="pl-pds">"</span></span> &lt;&lt; glossary[<span class="pl-s1"><span class="pl-pds">"</span>nothing<span class="pl-pds">"</span></span>] &lt;&lt; std::endl;
+
+    std::ofstream <span class="pl-vo">fout</span>(<span class="pl-s1"><span class="pl-pds">"</span>save.json<span class="pl-pds">"</span></span>);
+    fout &lt;&lt; glossary;
+    fout.<span class="pl-s3">close</span>();
+
+    <span class="pl-c">// implicit casting</span>
+    jsoncxx::value::string str = glossary[<span class="pl-s1"><span class="pl-pds">"</span>title<span class="pl-pds">"</span></span>];
+    jsoncxx::natural natural = glossary[<span class="pl-s1"><span class="pl-pds">"</span>number<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>natural<span class="pl-pds">"</span></span>];
+    jsoncxx::real    real    = glossary[<span class="pl-s1"><span class="pl-pds">"</span>number<span class="pl-pds">"</span></span>][<span class="pl-s1"><span class="pl-pds">"</span>real<span class="pl-pds">"</span></span>];
+
+    <span class="pl-c">// explicit casting for bool type</span>
+    <span class="pl-st">bool</span> boolean = (<span class="pl-st">bool</span>)glossary[<span class="pl-s1"><span class="pl-pds">"</span>boolean<span class="pl-pds">"</span></span>];
+
+    <span class="pl-c">// initializer_list example</span>
+    glossary[<span class="pl-s1"><span class="pl-pds">"</span>array<span class="pl-pds">"</span></span>] = { <span class="pl-c1">1</span>, <span class="pl-c1">3.141592</span>, <span class="pl-c1">true</span>, <span class="pl-s1"><span class="pl-pds">"</span>a string<span class="pl-pds">"</span></span>};
+
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Jsoncxx maintained by <a href="https://github.com/seonho">seonho</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
