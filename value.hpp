@@ -8,14 +8,13 @@
 
 #pragma once
 
-#include <string>   // basic_string
-#include <ostream>  // basic_ostream
-//#include <list>
+#include <string>		// basic_string
+#include <ostream>		// basic_ostream
 #include <vector>
 #include <map>
-#include <cstring>  // memset
-#include <algorithm> // transform
-#include <iterator> // ostream_iterator
+#include <cstring>		// memset
+#include <algorithm>	// transform
+#include <iterator>		// ostream_iterator
 
 namespace jsoncxx {
     
@@ -61,9 +60,9 @@ class Value
 {
 public:
     typedef typename Encoding::char_type	char_type;      //! Character type derived from Encoding.
-    typedef Value<Encoding>					self_type;      //!
-    typedef std::basic_string<char_type>	string;
-    typedef std::basic_ostream<char_type, std::char_traits<char_type> >	ostream;
+    typedef Value<Encoding>					self_type;
+    typedef std::basic_string<char_type>	string;			//! String type
+    typedef std::basic_ostream<char_type, std::char_traits<char_type> >	ostream;	//! Output stream type
     
 protected:
     //!	Represents a number type value.
@@ -90,39 +89,12 @@ protected:
 	struct Array
 	{
         typedef Value<Encoding>                         elem_type;
-        //typedef std::list<elem_type>                    storage_type;
 		typedef std::vector<elem_type>                  storage_type;
         typedef typename storage_type::iterator         iterator;
         typedef typename storage_type::const_iterator   const_iterator;
         
-        //elem_type& operator[] (size_t index)
-        //{
-        //    if (index < size())
-        //        return *std::next(elements_->begin(), index);
-        //    else
-        //        throw std::runtime_error("Out of range");
-        //    
-        //    return Value<Encoding>::null(); // unreachable
-        //}
-        //
-        //const elem_type& operator[] (size_t index) const
-        //{
-        //    if (index < size())
-        //        return *std::next(elements_->begin(), index);
-        //    else
-        //        throw std::runtime_error("Out of range");
-        //    
-        //    return Value<Encoding>::null(); // unreachable
-        //}
-		inline elem_type& operator[] (size_t index)
-		{
-			return (*elements_)[index];
-		}
-
-		inline const elem_type& operator[] (size_t index) const
-		{
-			return (*elements_)[index];
-		}
+		inline		 elem_type& operator[] (size_t index)		{ return (*elements_)[index]; }
+		inline const elem_type& operator[] (size_t index) const	{ return (*elements_)[index]; }
         
         inline void clear()                 { elements_->clear(); }
         inline size_type size() const       { return (size_type)elements_->size(); }
@@ -181,6 +153,8 @@ protected:
             return _key;
         }
         
+		//! STL style functions
+		//! @{
         inline void clear()                 { return members_->clear(); }
         inline size_type size() const       { return (size_type)members_->size(); }
         inline bool empty() const           { return members_->empty(); }
@@ -190,6 +164,7 @@ protected:
         
 		inline const_iterator begin() const	{ return members_->begin(); }
 		inline const_iterator end() const	{ return members_->end(); }
+		//!	@}
         
         storage_type*    members_;
     };
@@ -424,7 +399,7 @@ public:
 
 		return true;
 	}
-    
+	    
     //! @}
     
     //! @name	Property functions.
@@ -434,21 +409,28 @@ public:
 	inline ValueType type() const       { return type_; }
     
     //! get boolean value
-	bool asBool() const
+	inline bool asBool() const
 	{
 		JSONCXX_ASSERT(type_ == TrueType || type_ == FalseType);
 		return (type_ == TrueType);
 	}
     
 	//! get string value
-	const string& asString() const
+	inline const string& asString() const
+	{
+		JSONCXX_ASSERT(type_ == StringType);
+		return *(value_.s.str_);
+	}
+
+	//! get string value
+	inline string& asString()
 	{
 		JSONCXX_ASSERT(type_ == StringType);
 		return *(value_.s.str_);
 	}
     
 	//! get natural value
-	natural asNatural() const
+	inline natural asNatural() const
 	{
 		JSONCXX_ASSERT(type_ == NumberType);
 		if (value_.n.type_ == NaturalNumber)
@@ -457,7 +439,7 @@ public:
 	}
     
 	//! get real value
-	real asReal() const
+	inline real asReal() const
 	{
 		JSONCXX_ASSERT(type_ == NumberType);
 		if (value_.n.type_ == RealNumber)
@@ -651,44 +633,19 @@ public:
         return value_.s.hash_ < other.value_.s.hash_;
     }
 
-	//!	@name Cast operator
+	//!	@name Cast operators.
 	//!	@{
 #if __cplusplus > 199711L || _MSC_VER >= 1800
-	inline explicit operator bool() const
-	{
-		return asBool();
-	}
+	inline explicit operator bool() const	{ return asBool(); }
 #endif
 
-	inline operator string&() const
-	{
-		return asString();
-	}
-
-	inline operator natural() const
-	{
-		return asNatural();
-	}
-
-	inline operator real() const
-	{
-		return asReal();
-	}
-
-	inline operator Number&() const
-	{
-		return asNumber();
-	}
-
-	inline operator Array&() const
-	{
-		return asArray();
-	}
-
-	inline operator Object&() const
-	{
-		return asObject();
-	}
+	inline operator natural() const			{ return asNatural(); }
+	inline operator real() const			{ return asReal(); }
+	inline operator string&()				{ return asString(); }
+	inline operator	const string&() const	{ return asString(); }
+	inline operator const Number&() const	{ return asNumber(); }
+	inline operator const Array&() const	{ return asArray(); }
+	inline operator const Object&() const	{ return asObject(); }
 	//!	@}
     
 private:

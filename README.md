@@ -1,9 +1,9 @@
-jsoncxx
+JSONCXX
 =======
 
 ### Introduction
 
-`jsoncxx` is an attempt to create template JSON parser and generator with very simple API via combining advantages of two famous libraries, [RapidJSON](https://github.com/miloyip/rapidjson) and [JSONCPP](https://github.com/open-source-parsers/jsoncpp).
+`JSONCXX` is an attempt to create template JSON parser and generator with very simple API via combining advantages of two famous libraries, [RapidJSON](https://github.com/miloyip/rapidjson) and [JSONCPP](https://github.com/open-source-parsers/jsoncpp).
 
 ### A note
 
@@ -11,9 +11,9 @@ Current version do not fully support JSON specifications.
 
 ### Usage at a glance
 
-The `jsoncxx` should be added to your compile include path.
+The `JSONCXX` should be added to your compile include path.
 
-```cpp
+~~~cpp
 #include "jsoncxx.hpp"
 
 int main()
@@ -65,7 +65,18 @@ int main()
     fout << glossary;
     fout.close();
 
+    // implicit casting
+    jsoncxx::value::string str = glossary["title"];
+    jsoncxx::natural natural = glossary["number"]["natural"];
+    jsoncxx::real    real    = glossary["number"]["real"];
+
+    // explicit casting for bool type
+    bool boolean = (bool)glossary["boolean"];
+
+    // initializer_list example
+    glossary["array"] = { 1, 3.141592, true, "a string"};
+
     return 0;
 }
-```
+~~~
 
