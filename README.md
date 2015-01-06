@@ -13,7 +13,7 @@ Current version do not fully support JSON specifications.
 
 The `JSONCXX` should be added to your compile include path.
 
-~~~cpp
+```cpp
 #include "jsoncxx.hpp"
 
 int main()
@@ -78,5 +78,5 @@ int main()
 
     return 0;
 }
-~~~
+```
 
