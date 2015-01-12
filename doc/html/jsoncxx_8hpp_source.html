@@ -91,37 +91,37 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <a href="jsoncxx_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#pragma once</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="jsoncxx_8hpp.html#ac589f18b96402558f5e3601e4073e8dc">   12</a></span>&#160;<span class="preprocessor">#define JSONCXX_ASSERT(x) assert(x)</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="value_8hpp.html">value.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="stream_8hpp.html">stream.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="reader_8hpp.html">reader.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="writer_8hpp.html">writer.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">namespace </span>jsoncxx</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;{</div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">   22</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_value.html">Value&lt;UTF8&lt;&gt;</a> &gt;                          <a class="code" href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">value</a>;</div>
-<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">   23</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_reader.html">Reader&lt;StringStream&lt;UTF8&lt;&gt;</a> &gt;, <a class="code" href="structjsoncxx_1_1_u_t_f8.html">UTF8&lt;&gt;</a> &gt;  <a class="code" href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">reader</a>;</div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">   24</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_writer.html">Writer&lt;StringStream&lt;UTF8&lt;&gt;</a> &gt;, <a class="code" href="structjsoncxx_1_1_u_t_f8.html">UTF8&lt;&gt;</a> &gt;  <a class="code" href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">writer</a>;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}</div>
-<div class="ttc" id="classjsoncxx_1_1_writer_html"><div class="ttname"><a href="classjsoncxx_1_1_writer.html">jsoncxx::Writer</a></div><div class="ttdoc">Generic writer class. </div><div class="ttdef"><b>Definition:</b> writer.hpp:21</div></div>
-<div class="ttc" id="classjsoncxx_1_1_reader_html"><div class="ttname"><a href="classjsoncxx_1_1_reader.html">jsoncxx::Reader</a></div><div class="ttdoc">Generic reader class. </div><div class="ttdef"><b>Definition:</b> reader.hpp:156</div></div>
-<div class="ttc" id="namespacejsoncxx_html_aaaed0977f6b798cbc199762614a1b8d0"><div class="ttname"><a href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">jsoncxx::writer</a></div><div class="ttdeci">Writer&lt; StringStream&lt; UTF8&lt;&gt; &gt;, UTF8&lt;&gt; &gt; writer</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:24</div></div>
-<div class="ttc" id="namespacejsoncxx_html_a24ae1f68234c78c55070938d34f622e6"><div class="ttname"><a href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">jsoncxx::reader</a></div><div class="ttdeci">Reader&lt; StringStream&lt; UTF8&lt;&gt; &gt;, UTF8&lt;&gt; &gt; reader</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:23</div></div>
-<div class="ttc" id="namespacejsoncxx_html_a151ec33bd1b3d49a9619ba94470830b3"><div class="ttname"><a href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">jsoncxx::value</a></div><div class="ttdeci">Value&lt; UTF8&lt;&gt; &gt; value</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:22</div></div>
-<div class="ttc" id="stream_8hpp_html"><div class="ttname"><a href="stream_8hpp.html">stream.hpp</a></div></div>
-<div class="ttc" id="classjsoncxx_1_1_value_html"><div class="ttname"><a href="classjsoncxx_1_1_value.html">jsoncxx::Value</a></div><div class="ttdoc">Represents a JSON value. Use value for UTF8 encoding. </div><div class="ttdef"><b>Definition:</b> value.hpp:59</div></div>
-<div class="ttc" id="reader_8hpp_html"><div class="ttname"><a href="reader_8hpp.html">reader.hpp</a></div></div>
-<div class="ttc" id="writer_8hpp_html"><div class="ttname"><a href="writer_8hpp.html">writer.hpp</a></div></div>
-<div class="ttc" id="structjsoncxx_1_1_u_t_f8_html"><div class="ttname"><a href="structjsoncxx_1_1_u_t_f8.html">jsoncxx::UTF8</a></div><div class="ttdoc">UTF-8 encoding. </div><div class="ttdef"><b>Definition:</b> encoding.hpp:46</div></div>
-<div class="ttc" id="value_8hpp_html"><div class="ttname"><a href="value_8hpp.html">value.hpp</a></div></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#pragma once</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="jsoncxx_8hpp.html#ac589f18b96402558f5e3601e4073e8dc">   13</a></span>&#160;<span class="preprocessor">#define JSONCXX_ASSERT(x) assert(x)</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="value_8hpp.html">value.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="stream_8hpp.html">stream.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="reader_8hpp.html">reader.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="writer_8hpp.html">writer.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">namespace </span>jsoncxx</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;{</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">   23</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_value.html">Value&lt;UTF8&lt;&gt;</a> &gt;                          <a class="code" href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">value</a>;</div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">   24</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_reader.html">Reader&lt;StringStream&lt;UTF8&lt;&gt;</a> &gt;, <a class="code" href="structjsoncxx_1_1_u_t_f8.html">UTF8&lt;&gt;</a> &gt;  <a class="code" href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">reader</a>;</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">   25</a></span>&#160;    <span class="keyword">typedef</span> <a class="code" href="classjsoncxx_1_1_writer.html">Writer&lt;StringStream&lt;UTF8&lt;&gt;</a> &gt;, <a class="code" href="structjsoncxx_1_1_u_t_f8.html">UTF8&lt;&gt;</a> &gt;  <a class="code" href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">writer</a>;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;}</div>
+<div class="ttc" id="classjsoncxx_1_1_writer_html"><div class="ttname"><a href="classjsoncxx_1_1_writer.html">jsoncxx::Writer</a></div><div class="ttdoc">Generic writer class. </div><div class="ttdef"><b>Definition:</b> writer.hpp:22</div></div>
+<div class="ttc" id="classjsoncxx_1_1_reader_html"><div class="ttname"><a href="classjsoncxx_1_1_reader.html">jsoncxx::Reader</a></div><div class="ttdoc">Generic reader class. </div><div class="ttdef"><b>Definition:</b> reader.hpp:157</div></div>
+<div class="ttc" id="namespacejsoncxx_html_aaaed0977f6b798cbc199762614a1b8d0"><div class="ttname"><a href="namespacejsoncxx.html#aaaed0977f6b798cbc199762614a1b8d0">jsoncxx::writer</a></div><div class="ttdeci">Writer&lt; StringStream&lt; UTF8&lt;&gt; &gt;, UTF8&lt;&gt; &gt; writer</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:25</div></div>
+<div class="ttc" id="namespacejsoncxx_html_a24ae1f68234c78c55070938d34f622e6"><div class="ttname"><a href="namespacejsoncxx.html#a24ae1f68234c78c55070938d34f622e6">jsoncxx::reader</a></div><div class="ttdeci">Reader&lt; StringStream&lt; UTF8&lt;&gt; &gt;, UTF8&lt;&gt; &gt; reader</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:24</div></div>
+<div class="ttc" id="namespacejsoncxx_html_a151ec33bd1b3d49a9619ba94470830b3"><div class="ttname"><a href="namespacejsoncxx.html#a151ec33bd1b3d49a9619ba94470830b3">jsoncxx::value</a></div><div class="ttdeci">Value&lt; UTF8&lt;&gt; &gt; value</div><div class="ttdef"><b>Definition:</b> jsoncxx.hpp:23</div></div>
+<div class="ttc" id="stream_8hpp_html"><div class="ttname"><a href="stream_8hpp.html">stream.hpp</a></div><div class="ttdoc">Provide generic string stream struct. </div></div>
+<div class="ttc" id="classjsoncxx_1_1_value_html"><div class="ttname"><a href="classjsoncxx_1_1_value.html">jsoncxx::Value</a></div><div class="ttdoc">Represents a JSON value. Use value for UTF8 encoding. </div><div class="ttdef"><b>Definition:</b> value.hpp:60</div></div>
+<div class="ttc" id="reader_8hpp_html"><div class="ttname"><a href="reader_8hpp.html">reader.hpp</a></div><div class="ttdoc">Implement generic reader class. </div></div>
+<div class="ttc" id="writer_8hpp_html"><div class="ttname"><a href="writer_8hpp.html">writer.hpp</a></div><div class="ttdoc">Implement generic writer class. </div></div>
+<div class="ttc" id="structjsoncxx_1_1_u_t_f8_html"><div class="ttname"><a href="structjsoncxx_1_1_u_t_f8.html">jsoncxx::UTF8</a></div><div class="ttdoc">UTF-8 encoding. </div><div class="ttdef"><b>Definition:</b> encoding.hpp:47</div></div>
+<div class="ttc" id="value_8hpp_html"><div class="ttname"><a href="value_8hpp.html">value.hpp</a></div><div class="ttdoc">Implement generic value type. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jan 6 2015 09:26:36 for JSONCXX by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jan 12 2015 19:54:47 for JSONCXX by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.5
 </small></address>
