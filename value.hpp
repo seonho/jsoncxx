@@ -1,5 +1,6 @@
 /**
  *	@file		value.hpp
+ *	@brief		Implement generic value type.
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
  *	@copyright	2007-2014 seonho.oh@gmail.com

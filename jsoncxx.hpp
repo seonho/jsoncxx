@@ -1,5 +1,6 @@
 /**
  *	@file		jsoncxx.hpp
+ *	@brief		Instantiate UTF8 value, reader and writer types.
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
  *	@copyright	2007-2014 seonho.oh@gmail.com
