@@ -3,7 +3,7 @@
  *	@brief		Implement generic reader class.
  *	@author		seonho.oh@gmail.com
  *	@date		2013-11-01
- *	@copyright	2007-2014 seonho.oh@gmail.com, Copyright (c) 2011 Milo Yip (miloyip@gmail.com)
+ *	@copyright	2013-2015 seonho.oh@gmail.com, Copyright (c) 2011 Milo Yip (miloyip@gmail.com)
  *	@version	1.0
  */
 
