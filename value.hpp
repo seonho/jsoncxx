@@ -16,6 +16,18 @@
 #include <cstring>		// memset
 #include <algorithm>	// transform
 #include <iterator>		// ostream_iterator
+#include <type_traits>
+
+ // Helper to determine whether there's a const_iterator for T.
+template<typename T>
+struct has_const_iterator
+{
+private:
+	template<typename C> static char check(typename C::const_iterator*);
+	template<typename C> static int  check(...);
+public:
+	enum { value = sizeof(check<T>(0)) == sizeof(char) };
+};
 
 namespace jsoncxx {
     
@@ -304,6 +316,20 @@ public:
 			value_.a.elements_->push_back(elem);
 		});
 	}
+
+	//! ctor for numeric vector
+	/*template<template <typename... A> class Container, typename T, typename... Alloc>
+	Value(const Container<T, Alloc...>& container)*/
+	template<typename Container>
+	Value(const Container& container, typename std::enable_if<has_const_iterator<Container>::value, void>::type* junk = nullptr)
+		: Value(ArrayType)
+	{
+		typedef typename Container::value_type value_type;
+		value_.a.elements_->reserve(container.size());
+		std::for_each(container.begin(), container.end(), [&](const value_type elem) {
+			value_.a.elements_->push_back(elem);
+		});
+	}
     
     //! ctor for boolean type.
 	Value(bool value)
@@ -336,12 +362,12 @@ public:
 	}
 
 #if __cplusplus > 199711L || _MSC_VER >= 1800
-	//! ctor for array type.
-	Value(std::initializer_list<self_type> l)
-		: type_(ArrayType)
-	{
-		value_.a.elements_ = new typename Array::storage_type(l.begin(), l.end());
-	}
+	////! ctor for array type.
+	//Value(std::initializer_list<self_type> l)
+	//	: type_(ArrayType)
+	//{
+	//	value_.a.elements_ = new typename Array::storage_type(l.begin(), l.end());
+	//}
 #endif
     
     //! @name	STL style functions.
@@ -670,6 +696,26 @@ public:
 	inline operator const Array&() const	{ return asArray(); }
 	inline operator const Object&() const	{ return asObject(); }
 	//!	@}
+
+	/*template<typename R>
+	operator typename std::enable_if<std::is_arithmetic<R>::value, R>::type() const {
+		JSONCXX_ASSERT(type_ == NumericType);
+
+		if (value_.num_.type == NaturalNumber)
+			return static_cast<R>(asNatural());
+		else
+			return static_cast<R>(asReal());
+	}*/
+
+	template<typename R>
+	typename std::enable_if<std::is_arithmetic<R>::value, R>::type value() const {
+		JSONCXX_ASSERT(type_ == NumberType);
+
+		if (value_.n.type_ == NaturalNumber)
+			return static_cast<R>(asNatural());
+		else
+			return static_cast<R>(asReal());
+	}
     
 private:
 	ValueHolder     value_;
