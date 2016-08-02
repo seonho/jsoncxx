@@ -291,6 +291,19 @@ public:
 				value_.n.num_.n = static_cast<natural>(value);
 		}
 	}
+
+	//! ctor for numeric array
+	template <typename T>
+	Value(T arr, size_t n, typename std::enable_if<std::is_pointer<T>::value>::type* junk = nullptr)
+		: Value(ArrayType)
+	{
+		typedef typename std::remove_const<std::remove_pointer<T>::type>::type elem_type;
+		value_.a.elements_->reserve(n);
+
+		std::for_each(arr, arr + n, [&](const elem_type elem) {
+			value_.a.elements_->push_back(elem);
+		});
+	}
     
     //! ctor for boolean type.
 	Value(bool value)
