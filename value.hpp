@@ -498,6 +498,15 @@ public:
 		return value_.a.elements_->back();
 	}
 
+	inline void reserve(size_t size) {
+		JSONCXX_ASSERT(type_ == NullType || type_ == ArrayType);
+
+		if (type_ == NullType)
+			*this = std::move(self_type(ArrayType));
+
+		value_.a.elements_->reserve(size);
+	}
+
 #if __cplusplus > 199711L || _MSC_VER >= 1800
 	//! Append list of values if current value type is array.
 	inline void append(std::initializer_list<self_type> l)
