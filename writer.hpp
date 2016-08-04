@@ -1,10 +1,10 @@
 /**
- *	@file		writer.hpp
- *	@brief		Implement generic writer class.
- *	@author		seonho.oh@gmail.com
- *	@date		2013-11-01
- *	@copyright	2013-2015 seonho.oh@gmail.com
- *	@version	1.0
+ *  @file   writer.hpp
+ *  @brief    Implement generic writer class.
+ *  @author   seonho.oh@gmail.com
+ *  @date   2013-11-01
+ *  @copyright  2013-2015 seonho.oh@gmail.com
+ *  @version  1.0
  */
 
 #pragma once
@@ -14,130 +14,120 @@
 
 #include <fstream>      // basic_ofstream
 
-namespace jsoncxx
-{
+namespace jsoncxx {
 
-//!	Generic writer class
+//! Generic writer class
 template <typename Stream, typename Encoding = UTF8<> >
-class Writer
-{
-public:
-	typedef typename Encoding::char_type        char_type;
-    typedef std::basic_string<char_type>		string;
-    typedef std::basic_ofstream<char_type>      ofstream;
-    
-	typedef typename Value<Encoding>::Number	Number;
-	typedef typename Value<Encoding>::String	String;
-	typedef typename Value<Encoding>::Array		Array;
-	typedef typename Value<Encoding>::Object	Object;
+class Writer {
+ public:
+  typedef typename Encoding::char_type        char_type;
+  typedef std::basic_string<char_type>    string;
+  typedef std::basic_ofstream<char_type>      ofstream;
 
-	Writer(Stream& stream, size_type nestingLevel = 0)
-		: stream_(stream), nestingLevel_(nestingLevel) {}
+  typedef typename Value<Encoding>::Number  Number;
+  typedef typename Value<Encoding>::String  String;
+  typedef typename Value<Encoding>::Array   Array;
+  typedef typename Value<Encoding>::Object  Object;
 
-	Writer& operator << (const Value<Encoding>& value)
-	{
-		switch (value.type()) {
-		case NullType:
-			writeNull();
-			break;
-		case FalseType:
-		case TrueType:
-			writeBoolean(value.asBool());
-			break;
-		case ObjectType:
-			writeObject(value.asObject());
-			break;
-		case ArrayType:
-			writeArray(value.asArray());
-			break;
-		case StringType:
-			writeString(value.asString());
-			break;
-		case NumberType:
-			writeNumber(value.asNumber());
-			break;
-		}
+  Writer(Stream& stream, size_type nestingLevel = 0)
+    : stream_(stream), nestingLevel_(nestingLevel) {}
 
-		return *this;
-	}
+  Writer& operator << (const Value<Encoding>& value) {
+    switch (value.type()) {
+    case NullType:
+      writeNull();
+      break;
+    case FalseType:
+    case TrueType:
+      writeBoolean(value.asBool());
+      break;
+    case ObjectType:
+      writeObject(value.asObject());
+      break;
+    case ArrayType:
+      writeArray(value.asArray());
+      break;
+    case StringType:
+      writeString(value.asString());
+      break;
+    case NumberType:
+      writeNumber(value.asNumber());
+      break;
+    }
 
-	Writer& operator << (const char_type* str)
-	{
-		stream_ << str;
-		return *this;
-	}
+    return *this;
+  }
 
-protected:
-	//!	@name	Internal functions
-	//!	@{
-	void writeNull()
-	{
-		stream_.put('n'); stream_.put('u'); stream_.put('l'); stream_.put('l');
-	}
+  Writer& operator << (const char_type* str) {
+    stream_ << str;
+    return *this;
+  }
 
-	void writeBoolean(bool b)
-	{
-		if (b) {
-			stream_.put('t'); stream_.put('r'); stream_.put('u'); stream_.put('e');
-		} else {
-			stream_.put('f'); stream_.put('a'); stream_.put('l'); stream_.put('s'); stream_.put('e');
-		}
-	}
+ protected:
+  //! @name Internal functions
+  //! @{
+  void writeNull() {
+    stream_.put('n'); stream_.put('u'); stream_.put('l'); stream_.put('l');
+  }
 
-	void writeNumber(const Number& n)
-	{
-		if (n.type_ == NaturalNumber)
-			stream_ << n.num_.n;
-		else
-			stream_ << n.num_.r;
-	}
+  void writeBoolean(bool b) {
+    if (b) {
+      stream_.put('t'); stream_.put('r'); stream_.put('u'); stream_.put('e');
+    } else {
+      stream_.put('f'); stream_.put('a'); stream_.put('l'); stream_.put('s'); stream_.put('e');
+    }
+  }
 
-	void writeString(const string& s)
-	{
-		stream_.put('\"');
-		stream_ << s.c_str();
-		stream_.put('\"');
-	}
+  void writeNumber(const Number& n) {
+    if (n.type_ == NaturalNumber)
+      stream_ << n.num_.n;
+    else
+      stream_ << n.num_.r;
+  }
 
-	void writeArray(const Array& a)
-	{
-		stream_.put('[');
-		
-		std::for_each(a.begin(), std::next(a.begin(), a.size() - 1), [&](const Value<Encoding>& value) {
-			(*this) << value;
-			stream_.put(',');
-		});
-		(*this) << a.back();
+  void writeString(const string& s) {
+    stream_.put('\"');
+    stream_ << s.c_str();
+    stream_.put('\"');
+  }
 
-		stream_.put(']');
-	}
+  void writeArray(const Array& a) {
+    stream_.put('[');
 
-	void writeObject(const Object& o)
-	{
-		stream_.put('{');
+    std::for_each(a.begin(), std::next(a.begin(), a.size() - 1), [&](const Value<Encoding>& value) {
+      (*this) << value;
+      stream_.put(',');
+    });
+    (*this) << a.back();
 
-		auto func = [&](const typename Object::member_type& pair) {
-			(*this) << pair.first;
-			stream_.put(':');
-			(*this) << pair.second;
-		};
+    stream_.put(']');
+  }
 
-		std::for_each(o.begin(), std::next(o.begin(), o.size() - 1), [&](const typename Object::member_type& pair) {
-			func(pair);
-			stream_.put(',');
-		});
-		func(*std::next(o.begin(), o.size() - 1));
+  void writeObject(const Object& o) {
+    stream_.put('{');
 
-		stream_.put('}');
-	}
+    auto func = [&](const typename Object::member_type & pair) {
+      (*this) << pair.first;
+      stream_.put(':');
+      (*this) << pair.second;
+    };
 
-	//!	@}
+    std::for_each(o.begin(), std::next(o.begin(), o.size() - 1), [&](const typename Object::member_type & pair) {
+      func(pair);
+      stream_.put(',');
+    });
+    func(*std::next(o.begin(), o.size() - 1));
 
-protected:
-	//!
-private:
-	Stream&		stream_;		///< stream object
-	size_type	nestingLevel_;	///< nesting level
+    stream_.put('}');
+  }
+
+  //! @}
+
+ protected:
+  //!
+ private:
+  Stream&   stream_;    ///< stream object
+  size_type nestingLevel_;  ///< nesting level
 };
 
 }
