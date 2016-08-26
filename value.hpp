@@ -616,7 +616,7 @@ class Value {
       if (value.asNumber().type_ == NaturalNumber)
         os << value.asNatural();
       else {
-        os.precision(std::numeric_limits<real>::digits10);
+		os.setf(std::ios::fixed, std::ios::floatfield);
         os << value.asReal();
       }
       break;
