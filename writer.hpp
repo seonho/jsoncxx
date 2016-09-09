@@ -7,7 +7,8 @@
  *  @version  1.0
  */
 
-#pragma once
+#ifndef _JSONCXX_WRITER_H_
+#define _JSONCXX_WRITER_H_
 
 #include "encoding.hpp"
 #include "value.hpp"
@@ -131,3 +132,5 @@ class Writer {
 };
 
 }
+
+#endif // _JSONCXX_WRITER_H_

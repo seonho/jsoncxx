@@ -7,7 +7,8 @@
  *  @version  1.0
  */
 
-#pragma once
+#ifndef _JSONCXX_READER_H_
+#define _JSONCXX_READER_H_
 
 #include "encoding.hpp"
 #include "value.hpp"
@@ -316,11 +317,11 @@ class Reader {
     std::string number(s.src_, s_.src_);
 
     if (number.find('.') != std::string::npos ||
-		number.find('e') != std::string::npos || 
-		number.find('E') != std::string::npos)
-		ret = std::move(value_type((real)std::stod(number)));
+        number.find('e') != std::string::npos ||
+        number.find('E') != std::string::npos)
+      ret = std::move(value_type((real)std::stod(number)));
     else
-		ret = std::move(value_type((natural)std::stoll(number)));
+      ret = std::move(value_type((natural)std::stoll(number)));
 
     s = s_;
 
@@ -357,3 +358,5 @@ class Reader {
 };
 
 }
+
+#endif // _JSONCXX_READER_H_

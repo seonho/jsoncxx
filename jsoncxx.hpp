@@ -7,7 +7,8 @@
  *  @version  1.0
  */
 
-#pragma once
+#ifndef _JSONCXX_H_
+#define _JSONCXX_H_
 
 #include <cassert>
 #define JSONCXX_ASSERT(x) assert(x)
@@ -23,3 +24,5 @@ typedef Value<UTF8<> >                          value;
 typedef Reader<StringStream<UTF8<> >, UTF8<> >  reader;
 typedef Writer<StringStream<UTF8<> >, UTF8<> >  writer;
 }
+
+#endif // _JSONCXX_H_

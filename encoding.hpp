@@ -7,7 +7,8 @@
  *  @version  1.0
  */
 
-#pragma once
+#ifndef _JSONCXX_ENCODING_H_
+#define _JSONCXX_ENCODING_H_
 
 namespace jsoncxx {
 
@@ -113,3 +114,5 @@ struct UTF32 {
 };
 
 }
+
+#endif // _JSONCXX_ENCODING_H_

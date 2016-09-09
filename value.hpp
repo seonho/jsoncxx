@@ -7,7 +7,8 @@
  *  @version  1.0
  */
 
-#pragma once
+#ifndef _JSONCXX_VALUE_H_
+#define _JSONCXX_VALUE_H_
 
 #include <string>   // basic_string
 #include <ostream>    // basic_ostream
@@ -616,7 +617,7 @@ class Value {
       if (value.asNumber().type_ == NaturalNumber)
         os << value.asNatural();
       else {
-		os.setf(std::ios::fixed, std::ios::floatfield);
+        os.setf(std::ios::fixed, std::ios::floatfield);
         os << value.asReal();
       }
       break;
@@ -697,3 +698,5 @@ struct hash<jsoncxx::Value<Encoding> >
 }
 
 #endif
+
+#endif // _JSONCXX_VALUE_H_
